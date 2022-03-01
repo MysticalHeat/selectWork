@@ -1,6 +1,6 @@
 import workdb
 from flask import Flask, render_template, url_for, request, redirect
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 database = workdb.SelectDatabase()
@@ -11,6 +11,20 @@ def do_none(req):
         return None
     else:
         return req
+
+
+def last_time(lasttime):
+    if lasttime == 1:
+        print(datetime.now() - timedelta(hours=1))
+        return datetime.now() - timedelta(minutes=10)
+    if lasttime == 2:
+        return datetime.now() - timedelta(minutes=30)
+    if lasttime == 3:
+        return datetime.now() - timedelta(hours=1)
+    if lasttime == 4:
+        return datetime.now() - timedelta(days=1)
+    if lasttime == 5:
+        return datetime.now() - timedelta(days=30)
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -24,6 +38,10 @@ def index():
         weight0 = do_none(request.form['weight0'])
         weight1 = do_none(request.form['weight1'])
         keyword = do_none(request.form['keyword'])
+        lasttime = do_none(request.form['lasttime'])
+        if lasttime:
+            time0 = last_time(int(lasttime))
+            time1 = datetime.now()
         if source_id1 and source_id0 is None:
             source_id0 = 0
         if source_id0 and source_id1 is None:
@@ -35,7 +53,7 @@ def index():
         if time1 and time0 is None:
             time0 = '1970-01-01 00:00:00'
         if time0 and time1 is None:
-            time1 = datetime.utcnow()
+            time1 = datetime.now()
         result = database.get_info(
             time=[time0, time1],
             source_id=[source_id0, source_id1],

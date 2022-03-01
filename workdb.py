@@ -42,13 +42,13 @@ class SelectDatabase:
         for i in range(len(raw_info)):
             k = raw_info[i]
             if None is not k:
-                if i == 0 and time[0] and time[1]:
+                if i == 0 and (time[0] and time[1]) is not None:
                     info.append(f"time BETWEEN '{time[0]}' and '{time[1]}'")
-                if i == 1 and source_id[0] and source_id[1]:
+                if i == 1 and (source_id[0] and source_id[1]) is not None:
                     info.append(f"source_id BETWEEN {source_id[0]} and {source_id[1]}")
                 if i == 2:
                     info.append(f"priority = {priority}")
-                if i == 3 and weight[0] and weight[1]:
+                if i == 3 and (weight[0] and weight[1]) is not None:
                     info.append(f"weight BETWEEN {weight[0]} and {weight[1]}")
                 if i == 4:
                     info.append(f"to_tsvector(text) @@ to_tsquery('{keyword}')")
@@ -58,7 +58,6 @@ class SelectDatabase:
             cursor = connection.cursor()
             info_str = ' and '.join(info)
             select_info = 'SELECT * FROM work WHERE ' + info_str
-            print(select_info)
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
