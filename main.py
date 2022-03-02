@@ -15,7 +15,6 @@ def do_none(req):
 
 def last_time(lasttime):
     if lasttime == 1:
-        print(datetime.now() - timedelta(hours=1))
         return datetime.now() - timedelta(minutes=10)
     if lasttime == 2:
         return datetime.now() - timedelta(minutes=30)

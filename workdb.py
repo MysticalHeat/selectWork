@@ -62,7 +62,6 @@ class SelectDatabase:
             result = cursor.fetchall()
             connection.commit()
             print("Результат успешно возвращен")
-            print(result)
             return result
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
