@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-3">
             <h1>Выборка из бд</h1>
-            <form method="post">
+            <form action="/" id="form1" method="post">
                 <div class="input-group">
                     <span class="input-group-text">от</span><input type="datetime-local" name="time0" id="time0"
                                                                    class="form-control form-control-sm">
@@ -47,8 +47,12 @@
                     <option value="4">За последние сутки</option>
                     <option value="5">За последние 30 дней</option>
                 </select><br>
-                <input type="submit" class="btn btn-success" value="Отправить">
+                <input type="submit" class="btn btn-primary" value="Применить">
+                <input type="reset" class="btn btn-secondary" value="Сбросить">
             </form>
+            <div class="col">
+                <canvas id="myChart" width="400" height="400"></canvas>
+            </div>
         </div>
         <div class="col">
             <div class="table-responsive">
@@ -66,24 +70,63 @@
                         <th scope="col" class="col-sm-5">Текст</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    {% for el in result %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ el[0] }}</td>
-                        <td>{{ el[1] }}</td>
-                        <td>{{ el[2] }}</td>
-                        <td>{{ el[3] }}</td>
-                        <td>{{ el[4] }}</td>
-                        <td>{{ el[5] }}</td>
-                        <td>{{ el[6] }}</td>
-                        <td>{{ el[7] }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
                 </table>
             </div>
         </div>
     </div>
+
 </div>
+<script>
+
+    $(document).ready(function () {
+        $("#form1").submit(function (event) {
+            sendAjaxForm("form1", "tbody");
+            event.preventDefault();
+        });
+    });
+
+    function sendAjaxForm(form_ajax) {
+        var form = $("#" + form_ajax);
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function (response) {
+                $('table').html(response.data);
+                myChart.data.labels = ['Response', 'All']
+                myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count]
+                myChart.update()
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    const data = {
+        labels: [],
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: [
+                'rgb(83,95,201)',
+                'rgb(255,0,0)'
+            ],
+            borderColor: [
+                'rgb(83,95,201)',
+                'rgb(255,0,0)'
+            ],
+            data: [],
+        }]
+    };
+
+    const config = {
+        type: 'doughnut',
+        data: data,
+    };
+
+    const myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+    );
+</script>
 {% endblock %}

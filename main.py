@@ -1,6 +1,7 @@
 import workdb
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 from datetime import datetime, timedelta
+import json
 
 app = Flask(__name__)
 database = workdb.SelectDatabase()
@@ -15,7 +16,6 @@ def do_none(req):
 
 def last_time(lasttime):
     if lasttime == 1:
-        print(datetime.now() - timedelta(hours=1))
         return datetime.now() - timedelta(minutes=10)
     if lasttime == 2:
         return datetime.now() - timedelta(minutes=30)
@@ -39,7 +39,7 @@ def index():
         weight1 = do_none(request.form['weight1'])
         keyword = do_none(request.form['keyword'])
         lasttime = do_none(request.form['lasttime'])
-        if lasttime:
+        if lasttime != '0':
             time0 = last_time(int(lasttime))
             time1 = datetime.now()
         if source_id1 and source_id0 is None:
@@ -61,7 +61,11 @@ def index():
             weight=[weight0, weight1],
             keyword=keyword
         )
-        return render_template("index.html", result=result)
+        return jsonify({
+            'data': render_template('the_temp.html', result=result),
+            'resp_count': len(result),
+            'db_count': database.get_count()}
+        )
     else:
         return render_template("index.html")
 
