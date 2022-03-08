@@ -11,9 +11,9 @@
             <h1>Выборка из бд</h1>
             <form action="/" id="form1" method="post">
                 <div class="input-group">
-                    <span class="input-group-text">от</span><input type="datetime-local" name="time0" id="time0"
+                    <span class="input-group-text">c</span><input type="datetime-local" name="time0" id="time0"
                                                                    class="form-control form-control-sm">
-                    <span class="input-group-text">до</span><input type="datetime-local" name="time1" id="time1"
+                    <span class="input-group-text">по</span><input type="datetime-local" name="time1" id="time1"
                                                                    class="form-control form-control-sm">
                 </div>
                 <br>
@@ -39,8 +39,9 @@
                 <br>
                 <input type="text" name="keyword" id="keyword" placeholder="ключевое слово"
                        class="form-control form-control-sm"><br>
-                <select name="lasttime" class="form-select form-select-sm" aria-label=".form-select-sm example">
-                    <option selected value="">За последнее время</option>
+                <select id="lasttime" name="lasttime" class="form-select form-select-sm"
+                        aria-label=".form-select-sm example">
+                    <option selected disabled value="">За последнее время</option>
                     <option value="1">За последние 10 минут</option>
                     <option value="2">За последние 30 минут</option>
                     <option value="3">За последний час</option>
@@ -78,6 +79,7 @@
 </div>
 <script>
 
+
     $(document).ready(function () {
         $("#form1").submit(function (event) {
             sendAjaxForm("form1");
@@ -85,10 +87,55 @@
         });
     });
 
+    $('#time0').change(function () {
+        $('#lasttime').val(null);
+    });
+
+    $('#time1').change(function () {
+        $('#lasttime').val(null);
+    });
+
+    $('#lasttime').change(function () {
+        let startDate = new Date();
+        let now = new Date();
+        let val = document.getElementsByName('lasttime')[0].value;
+        switch (val) {
+            case '1': {
+                startDate.setMinutes(startDate.getMinutes() - 10);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                break;
+            }
+            case '2': {
+                startDate.setMinutes(startDate.getMinutes() - 30);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                break;
+            }
+            case '3': {
+                startDate.setHours(startDate.getHours() - 1);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                break;
+            }
+            case '4': {
+                startDate.setHours(startDate.getHours() - 24);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                break;
+            }
+            case '5': {
+                startDate.setDate(startDate.getDate() - 30);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                break;
+            }
+        }
+    });
+
     function sendAjaxForm(form_ajax) {
-        var form = $("#" + form_ajax);
-        console.log(form.serialize());
-        var arrForm = form.serializeArray();
+        let form = $("#" + form_ajax);
+        let arrForm = form.serializeArray();
         let validate;
         arrForm.forEach(item => {
             if (item?.value.length > 0) {
@@ -111,8 +158,7 @@
                 }
             });
 
-        }
-        else {
+        } else {
             $.ajax({
                 type: 'POST',
                 url: '/',
