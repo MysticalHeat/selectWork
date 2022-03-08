@@ -1,7 +1,6 @@
 import workdb
-from flask import Flask, render_template, url_for, request, redirect, jsonify
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timedelta
-import json
 
 app = Flask(__name__)
 database = workdb.SelectDatabase()
@@ -29,7 +28,7 @@ def last_time(lasttime):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    if request.method == "POST":
+    if request.method == "POST" and 'validate' not in request.form:
         time0 = do_none(request.form['time0'])
         time1 = do_none(request.form['time1'])
         source_id0 = do_none(request.form['source_id0'])
@@ -39,7 +38,7 @@ def index():
         weight1 = do_none(request.form['weight1'])
         keyword = do_none(request.form['keyword'])
         lasttime = do_none(request.form['lasttime'])
-        if lasttime != '0':
+        if lasttime:
             time0 = last_time(int(lasttime))
             time1 = datetime.now()
         if source_id1 and source_id0 is None:
@@ -66,6 +65,8 @@ def index():
             'resp_count': len(result),
             'db_count': database.get_count()}
         )
+    elif 'validate' in request.form:
+        return jsonify({'data': render_template('the_temp.html')})
     else:
         return render_template("index.html")
 

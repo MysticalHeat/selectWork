@@ -40,7 +40,7 @@
                 <input type="text" name="keyword" id="keyword" placeholder="ключевое слово"
                        class="form-control form-control-sm"><br>
                 <select name="lasttime" class="form-select form-select-sm" aria-label=".form-select-sm example">
-                    <option selected value="0">За последнее время</option>
+                    <option selected value="">За последнее время</option>
                     <option value="1">За последние 10 минут</option>
                     <option value="2">За последние 30 минут</option>
                     <option value="3">За последний час</option>
@@ -80,27 +80,55 @@
 
     $(document).ready(function () {
         $("#form1").submit(function (event) {
-            sendAjaxForm("form1", "tbody");
+            sendAjaxForm("form1");
             event.preventDefault();
         });
     });
 
     function sendAjaxForm(form_ajax) {
         var form = $("#" + form_ajax);
-        $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(),
-            success: function (response) {
-                $('table').html(response.data);
-                myChart.data.labels = ['Response', 'All']
-                myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count]
-                myChart.update()
-            },
-            error: function (error) {
-                console.log(error);
+        console.log(form.serialize());
+        var arrForm = form.serializeArray();
+        let validate;
+        arrForm.forEach(item => {
+            if (item?.value.length > 0) {
+                validate = true
             }
-        });
+        })
+        if (validate) {
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    $('table').html(response.data);
+                    myChart.data.labels = ['Response', 'All']
+                    myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count]
+                    myChart.update()
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+        }
+        else {
+            $.ajax({
+                type: 'POST',
+                url: '/',
+                data: 'validate=true',
+                success: function (response) {
+                    $('table').html(response.data);
+                    myChart.data.labels = []
+                    myChart.data.datasets[0].data = []
+                    myChart.update()
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
     }
 
     const data = {
