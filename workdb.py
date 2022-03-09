@@ -72,6 +72,26 @@ class SelectDatabase:
                 print("Соединение с PostgreSQL закрыто")
 
     def get_count(self):
+        """ Подсчет всего количества записей в БД """
+
+        try:
+            connection = self.coonect()
+            cursor = connection.cursor()
+            count = 'SELECT count(*) FROM work'
+            cursor.execute(count)
+            result = cursor.fetchone
+            connection.commit()
+            print("Результат успешно возвращен")
+            return result
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    def get_count(self):
         """ Получение количества строк из БД """
 
         try:

@@ -37,8 +37,8 @@ def index():
         weight0 = do_none(request.form['weight0'])
         weight1 = do_none(request.form['weight1'])
         keyword = do_none(request.form['keyword'])
-        lasttime = do_none(request.form['lasttime'])
-        if lasttime:
+        if 'lasttime' in request.form:
+            lasttime = do_none(request.form['lasttime'])
             time0 = last_time(int(lasttime))
             time1 = datetime.now()
         if source_id1 and source_id0 is None:
