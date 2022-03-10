@@ -1,0 +1,5 @@
+DB_HOST = "192.168.1.5"
+DB_DATABASE = "db_work"
+DB_USER = "nomli"
+DB_PORT = "5432"
+DB_PASSWORD = "***************"
