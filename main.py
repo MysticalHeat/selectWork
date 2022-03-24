@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-database = workdb.SelectDatabase()
+db = workdb.SelectDatabase()
 
 
 def do_none(req):
@@ -53,7 +53,7 @@ def index():
             time0 = '1970-01-01 00:00:00'
         if time0 and time1 is None:
             time1 = datetime.now()
-        result = database.get_info(
+        result = db.get_info(
             time=[time0, time1],
             source_id=[source_id0, source_id1],
             priority=priority,
@@ -63,7 +63,7 @@ def index():
         return jsonify({
             'data': render_template('the_temp.html', result=result),
             'resp_count': len(result),
-            'db_count': database.get_count()}
+            'db_count': db.get_count()}
         )
     elif 'validate' in request.form:
         return jsonify({'data': render_template('the_temp.html')})

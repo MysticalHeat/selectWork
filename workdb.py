@@ -7,6 +7,7 @@ class SelectDatabase:
     """ Класс для работы с базой данных """
 
     def __init__(self):
+        connection = None
         try:
             connection = self.connect()
             cursor = connection.cursor()
@@ -37,6 +38,7 @@ class SelectDatabase:
     def get_info(self, time=None, source_id=None, priority=None, weight=None, keyword=None):
         """ Выборка данных из БД """
 
+        connection = None
         raw_info = [time, source_id, priority, weight, keyword]
         info = []
         for i in range(len(raw_info)):
@@ -57,7 +59,7 @@ class SelectDatabase:
             connection = self.connect()
             cursor = connection.cursor()
             info_str = ' and '.join(info)
-            select_info = 'SELECT * FROM work WHERE ' + info_str
+            select_info = f'SELECT * FROM work WHERE {info_str}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
@@ -72,28 +74,8 @@ class SelectDatabase:
                 print("Соединение с PostgreSQL закрыто")
 
     def get_count(self):
-        """ Подсчет всего количества записей в БД """
-
-        try:
-            connection = self.coonect()
-            cursor = connection.cursor()
-            count = 'SELECT count(*) FROM work'
-            cursor.execute(count)
-            result = cursor.fetchone
-            connection.commit()
-            print("Результат успешно возвращен")
-            return result
-        except (Exception, Error) as error:
-            print("Ошибка при работе с PostgreSQL", error)
-        finally:
-            if connection:
-                cursor.close()
-                connection.close()
-                print("Соединение с PostgreSQL закрыто")
-
-    def get_count(self):
         """ Получение количества строк из БД """
-
+        connection = None
         try:
             connection = self.connect()
             cursor = connection.cursor()
