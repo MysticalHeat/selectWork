@@ -36,9 +36,9 @@ def index():
             lasttime = do_none(request.form['lasttime'])
             time0 = last_time(int(lasttime))
             time1 = datetime.now()
-        if (time1 and time0) is None:
+        if time1 and time0 is None:
             time0 = '1970-01-01 00:00:00'
-        if (time0 and time1) is None:
+        if time0 and time1 is None:
             time1 = datetime.now()
         result = db.get_info(
             time=[time0, time1],
@@ -56,4 +56,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)

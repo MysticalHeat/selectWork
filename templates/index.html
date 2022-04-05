@@ -12,7 +12,7 @@
             <form action="/" id="form1" method="post">
                 <div class="input-group">
                     <span class="input-group-text">c</span><input type="datetime-local" name="time0" id="time0"
-                                                                   class="form-control form-control-sm">
+                                                                  class="form-control form-control-sm">
                     <span class="input-group-text">по</span><input type="datetime-local" name="time1" id="time1"
                                                                    class="form-control form-control-sm">
                 </div>
@@ -61,19 +61,17 @@
             event.preventDefault();
         });
     });
-
     $('#time0').change(function () {
         $('#lasttime').val(null);
     });
-
     $('#time1').change(function () {
         $('#lasttime').val(null);
     });
-
     $('#lasttime').change(function () {
-        let startDate = new Date();
-        let now = new Date();
-        let val = document.getElementsByName('lasttime')[0].value;
+        var startDate = new Date();
+        var now = new Date();
+        var val = document.getElementsByName('lasttime')[0].value;
+
         switch (val) {
             case '1': {
                 startDate.setMinutes(startDate.getMinutes() - 10);
@@ -81,24 +79,28 @@
                 document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
                 break;
             }
+
             case '2': {
                 startDate.setMinutes(startDate.getMinutes() - 30);
                 document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
                 document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
                 break;
             }
+
             case '3': {
                 startDate.setHours(startDate.getHours() - 1);
                 document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
                 document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
                 break;
             }
+
             case '4': {
                 startDate.setHours(startDate.getHours() - 24);
                 document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
                 document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
                 break;
             }
+
             case '5': {
                 startDate.setDate(startDate.getDate() - 30);
                 document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
@@ -108,74 +110,64 @@
         }
     });
 
+    var data = {
+        labels: [],
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: ['rgb(83,95,201)', 'rgb(255,0,0)'],
+            borderColor: ['rgb(83,95,201)', 'rgb(255,0,0)'],
+            data: []
+        }]
+    };
+    var config = {
+        type: 'doughnut',
+        data: data
+    };
+    var myChart = new Chart(document.getElementById('myChart'), config);
+
     function sendAjaxForm(form_ajax) {
-        let form = $("#" + form_ajax);
-        let arrForm = form.serializeArray();
-        let validate;
-        arrForm.forEach(item => {
-            if (item?.value.length > 0) {
-                validate = true
+        var form = $("#" + form_ajax);
+        var arrForm = form.serializeArray();
+        var validate;
+        arrForm.forEach(function (item) {
+            if ((item === null || item === void 0 ? void 0 : item.value.length) > 0) {
+                validate = true;
             }
-        })
+        });
+
         if (validate) {
             $.ajax({
                 type: form.attr('method'),
                 url: form.attr('action'),
                 data: form.serialize(),
-                success: function (response) {
+                success: function success(response) {
                     $('table').html(response.data);
-                    myChart.data.labels = ['Response', 'All']
-                    myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count]
-                    myChart.update()
+                    myChart.data.labels = ['Response', 'All'];
+                    myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count];
+                    myChart.update();
                 },
-                error: function (error) {
-                    console.log(error);
+                error: function error(_error) {
+                    console.log(_error);
                 }
             });
-
         } else {
             $.ajax({
                 type: 'POST',
                 url: '/',
                 data: 'validate=true',
-                success: function (response) {
+                success: function success(response) {
                     $('table').html(response.data);
-                    myChart.data.labels = []
-                    myChart.data.datasets[0].data = []
-                    myChart.update()
+                    myChart.data.labels = [];
+                    myChart.data.datasets[0].data = [];
+                    myChart.update();
                 },
-                error: function (error) {
-                    console.log(error);
+                error: function error(_error2) {
+                    console.log(_error2);
                 }
             });
         }
-
     }
 
-    const data = {
-        labels: [],
-        datasets: [{
-            label: 'My First dataset',
-            backgroundColor: [
-                'rgb(83,95,201)',
-                'rgb(255,0,0)'
-            ],
-            borderColor: [
-                'rgb(83,95,201)',
-                'rgb(255,0,0)'
-            ],
-            data: [],
-        }]
-    };
 
-    const config = {
-        type: 'doughnut',
-        data: data,
-    };
-
-    const myChart = new Chart(
-        document.getElementById('myChart'),
-        config
-    );
 </script>
 {% endblock %}
