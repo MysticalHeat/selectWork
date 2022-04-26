@@ -35,31 +35,25 @@ class SelectDatabase:
         )
         return connection
 
-    def get_info(self, time=None, source_id=None, priority=None, weight=None, keyword=None):
+    def get_info(self, time=None, message=None):
         """ Выборка данных из БД """
 
         connection = None
-        raw_info = [time, source_id, priority, weight, keyword]
+        raw_info = [time, message]
         info = []
         for i in range(len(raw_info)):
             k = raw_info[i]
             if None is not k:
                 if i == 0 and (time[0] and time[1]) is not None:
-                    info.append(f"time BETWEEN '{time[0]}' and '{time[1]}'")
-                if i == 1 and (source_id[0] and source_id[1]) is not None:
-                    info.append(f"source_id BETWEEN {source_id[0]} and {source_id[1]}")
-                if i == 2:
-                    info.append(f"priority = {priority}")
-                if i == 3 and (weight[0] and weight[1]) is not None:
-                    info.append(f"weight BETWEEN {weight[0]} and {weight[1]}")
-                if i == 4:
-                    info.append(f"to_tsvector(text) @@ to_tsquery('{keyword}')")
+                    info.append(f"date_time BETWEEN '{time[0]}' and '{time[1]}'")
+                if i == 1:
+                    info.append(f"to_tsvector(original_message) @@ to_tsquery('{message}')")
 
         try:
             connection = self.connect()
             cursor = connection.cursor()
             info_str = ' and '.join(info)
-            select_info = f'SELECT * FROM work WHERE {info_str}'
+            select_info = f'SELECT id, date_time, original_message FROM public.table_cef WHERE {info_str}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
@@ -79,7 +73,7 @@ class SelectDatabase:
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            select_info = 'SELECT COUNT(*) FROM work'
+            select_info = 'SELECT COUNT(*) FROM public.table_cef'
             cursor.execute(select_info)
             result = cursor.fetchone()
             connection.commit()
