@@ -45,15 +45,15 @@ class SelectDatabase:
             k = raw_info[i]
             if None is not k:
                 if i == 0 and (time[0] and time[1]) is not None:
-                    info.append(f"start_time BETWEEN '{time[0]}' and '{time[1]}'")
+                    info.append(f"date_time BETWEEN '{time[0]}' and '{time[1]}'")
                 if i == 1:
-                    info.append(f"to_tsvector(message) @@ to_tsquery('{message}')")
+                    info.append(f"to_tsvector(original_message) @@ to_tsquery('{message}')")
 
         try:
             connection = self.connect()
             cursor = connection.cursor()
             info_str = ' and '.join(info)
-            select_info = f'SELECT * FROM public.text_table WHERE {info_str}'
+            select_info = f'SELECT id, date_time, original_message FROM public.table_cef WHERE {info_str}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
@@ -73,7 +73,7 @@ class SelectDatabase:
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            select_info = 'SELECT COUNT(*) FROM public.text_table'
+            select_info = 'SELECT COUNT(*) FROM public.table_cef'
             cursor.execute(select_info)
             result = cursor.fetchone()
             connection.commit()
