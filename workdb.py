@@ -1,6 +1,8 @@
+# coding: future_fstrings
 import config  # подключаем файл config.py с данным от БД
 import psycopg2
 from psycopg2 import Error
+
 
 
 class SelectDatabase:
