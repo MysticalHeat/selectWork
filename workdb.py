@@ -55,7 +55,7 @@ class SelectDatabase:
             connection = self.connect()
             cursor = connection.cursor()
             info_str = ' and '.join(info)
-            select_info = f'SELECT id, date_time, original_message FROM public.table_cef WHERE {info_str}'
+            select_info = f'SELECT * FROM public.table_cef WHERE {info_str}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
