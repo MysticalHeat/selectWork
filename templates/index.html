@@ -44,10 +44,7 @@
                         <th scope="col">№</th>
                         <th scope="col">Дата и время</th>
                         <th scope="col">host</th>
-                        <th scope="col">version</th>
                         <th scope="col">device_vendor</th>
-                        <th scope="col">device_product</th>
-                        <th scope="col">device_version</th>
                         <th scope="col">signature_id</th>
                         <th scope="col">extension</th>
                     </tr>
@@ -81,36 +78,36 @@
         switch (val) {
             case '1': {
                 startDate.setMinutes(startDate.getMinutes() - 10);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
                 break;
             }
 
             case '2': {
                 startDate.setMinutes(startDate.getMinutes() - 30);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
                 break;
             }
 
             case '3': {
                 startDate.setHours(startDate.getHours() - 1);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
                 break;
             }
 
             case '4': {
                 startDate.setHours(startDate.getHours() - 24);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
                 break;
             }
 
             case '5': {
                 startDate.setDate(startDate.getDate() - 30);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDThh:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDThh:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
                 break;
             }
         }
