@@ -37,7 +37,7 @@
         </div>
         <div class="col">
             <div class="table-responsive">
-                <table class="table table-striped table-sm caption-top">
+                <table id="table" class="table table-striped table-sm caption-top">
                     <caption>Количество строк: {{ result | length }}</caption>
                     <thead>
                     <tr>
@@ -57,12 +57,30 @@
 </div>
 <script>
 
+    var table;
 
     $(document).ready(function () {
         $("#form1").submit(function (event) {
             sendAjaxForm("form1");
             event.preventDefault();
         });
+
+        table = $('#table').DataTable(
+            {
+                searching: false,
+                autoWidth: false,
+                paging: false,
+                info: false,
+                columns: [
+                    {data: '#'},
+                    {data: 'dateTime'},
+                    {data: 'host'},
+                    {data: 'device_vendor'},
+                    {data: 'signature_id'},
+                    {data: 'extension'}
+                ],
+            }
+        );
     });
     $('#time0').change(function () {
         $('#lasttime').val(null);
@@ -144,7 +162,11 @@
                 url: form.attr('action'),
                 data: form.serialize(),
                 success: function success(response) {
-                    $('table').html(response.data);
+                    $('caption').html('Количество строк: '+response.data.length);
+                    table
+                        .clear()
+                        .rows.add(response.data)
+                        .draw();
                     myChart.data.labels = ['Response', 'All'];
                     myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count];
                     myChart.update();
@@ -159,7 +181,10 @@
                 url: '/',
                 data: 'validate=true',
                 success: function success(response) {
-                    $('table').html(response.data);
+                    $('caption').html('Количество строк: 0');
+                    table
+                        .clear()
+                        .draw()
                     myChart.data.labels = [];
                     myChart.data.datasets[0].data = [];
                     myChart.update();

@@ -12,16 +12,12 @@
 <tbody>
 {% for el in result %}
 <tr>
-
-    <td>{{ el[0] }}</td>
-    <td>{{ el[2] }}</td>
+    <td>{{ loop.index }}</td>
+    <td>{{ el[1] }}</td>
     <td>{{ el[3] }}</td>
     <td>{{ el[5] }}</td>
     <td>{{ el[8] }}</td>
     <td>{{ el[11] }}</td>
-
-
-
 </tr>
 {% endfor %}
 </tbody>

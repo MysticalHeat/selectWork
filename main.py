@@ -13,6 +13,17 @@ def do_none(req):
         return req
 
 
+def to_dict(data, count):
+    return {
+        '#': count+1,
+        'dateTime': str(data[1]),
+        'host': data[3],
+        'device_vendor': data[5],
+        'signature_id': data[8],
+        'extension': data[11]
+    }
+
+
 def last_time(lasttime):
     if lasttime == 1:
         return datetime.now() - timedelta(minutes=10)
@@ -45,7 +56,7 @@ def index():
             message=message
         )
         return jsonify({
-            'data': render_template('the_temp.html', result=result),
+            'data': [to_dict(row, count) for count, row in enumerate(result[::-1])],
             'resp_count': len(result),
             'db_count': db.get_count()}
         )
