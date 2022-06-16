@@ -28,8 +28,17 @@
                     <option value="4">За последние сутки</option>
                     <option value="5">За последние 30 дней</option>
                 </select><br>
-                <input type="submit" class="btn btn-primary" value="Применить">
-                <input type="reset" class="btn btn-secondary" value="Сбросить">
+                <div class="row">
+                    <div class="col">
+                        <input type="submit" class="btn btn-primary" value="Применить">
+                        <input type="reset" class="btn btn-secondary" value="Сбросить">
+                    </div>
+                    <div class="col form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="autoUpdate">
+                        <label class="form-check-label" for="autoUpdate">Авто-обновление</label>
+                    </div>
+
+                </div>
             </form>
             <div class="col">
                 <canvas id="myChart" width="400" height="400"></canvas>
@@ -82,6 +91,17 @@
             }
         );
     });
+    var timer;
+    $('#autoUpdate').change(function () {
+        var chkbx = document.getElementById('autoUpdate');
+        if (chkbx.checked) {
+            timer = setInterval(sendAjaxForm, 5000, 'form1');
+        }
+        else {
+            clearInterval(timer);
+        }
+    });
+
     $('#time0').change(function () {
         $('#lasttime').val(null);
     });
@@ -162,7 +182,7 @@
                 url: form.attr('action'),
                 data: form.serialize(),
                 success: function success(response) {
-                    $('caption').html('Количество строк: '+response.data.length);
+                    $('caption').html('Количество строк: ' + response.data.length);
                     table
                         .clear()
                         .rows.add(response.data)
