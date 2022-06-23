@@ -11,9 +11,9 @@
             <h1>Выборка из бд</h1>
             <form action="/" id="form1" method="post">
                 <div class="input-group">
-                    <span class="input-group-text">c</span><input type="datetime-local" name="time0" id="time0"
+                    <span class="input-group-text">c</span><input type="text" name="time0" id="time0"
                                                                   class="form-control form-control-sm">
-                    <span class="input-group-text">по</span><input type="datetime-local" name="time1" id="time1"
+                    <span class="input-group-text">по</span><input type="text" name="time1" id="time1"
                                                                    class="form-control form-control-sm">
                 </div>
                 <br>
@@ -91,17 +91,20 @@
             }
         );
     });
+
+
     var timer;
     $('#autoUpdate').change(function () {
         var chkbx = document.getElementById('autoUpdate');
         if (chkbx.checked) {
             timer = setInterval(sendAjaxForm, 5000, 'form1');
-        }
-        else {
+        } else {
             clearInterval(timer);
         }
     });
-
+    $.datetimepicker.setLocale('ru');
+    $('#time0').datetimepicker();
+    $('#time1').datetimepicker();
     $('#time0').change(function () {
         $('#lasttime').val(null);
     });
@@ -123,29 +126,29 @@
 
             case '2': {
                 startDate.setMinutes(startDate.getMinutes() - 30);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
                 break;
             }
 
             case '3': {
                 startDate.setHours(startDate.getHours() - 1);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
                 break;
             }
 
             case '4': {
                 startDate.setHours(startDate.getHours() - 24);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
                 break;
             }
 
             case '5': {
                 startDate.setDate(startDate.getDate() - 30);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
                 break;
             }
         }
@@ -185,7 +188,7 @@
                     $('caption').html('Количество строк: ' + response.data.length);
                     table
                         .clear()
-                        .rows.add(response.data)
+                        .rows.add(response.data.slice(0, 1000))
                         .draw();
                     myChart.data.labels = ['Response', 'All'];
                     myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count];
