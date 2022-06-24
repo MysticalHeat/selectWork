@@ -16,11 +16,18 @@ def do_none(req):
 def to_dict(data, count):
     return {
         '#': count+1,
-        'dateTime': str(data[1]),
+        'writing_utc': str(data[1]),
+        'date_time': str(data[2]),
         'host': data[3],
+        'version': data[4],
         'device_vendor': data[5],
+        'device_product': data[6],
+        'device_version': data[7],
         'signature_id': data[8],
-        'extension': data[11]
+        'name': data[9],
+        'severity': data[10],
+        'extension': data[11],
+        'original_message': data[12]
     }
 
 
