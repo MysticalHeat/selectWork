@@ -92,8 +92,9 @@
             {
                 searching: false,
                 autoWidth: false,
-                paging: false,
+                paging: true,
                 info: false,
+                lengthMenu: [20, 50, 100],
                 columns: [
                     {data: '#'},
                     {data: 'writing_utc'},
@@ -233,7 +234,7 @@
                 url: form.attr('action'),
                 data: form.serialize(),
                 success: function success(response) {
-                    $('#count').html('Количество строк: ' + response.data.length);
+                    $('#count').html('Количество строк: ' + response.db_count + ' Отображено: ' + response.resp_count);
                     table
                         .clear()
                         .rows.add(response.data.slice(0, 1000))
