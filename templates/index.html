@@ -41,8 +41,14 @@
                 </div>
             </form>
             <div class="col">
-                <canvas id="myChart" width="400" height="400"></canvas>
+                <div id="tree-simple" style="width:335px; height: auto; margin: auto"></div>
             </div>
+            <div class="col">
+                <div style="width:335px; height: 335px; margin: auto">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+
         </div>
         <div class="col-9">
             <div class="table-responsive">
@@ -81,6 +87,86 @@
 <script>
 
     var table;
+
+    var simple_chart_config = {
+        chart: {
+            container: "#tree-simple",
+            node: {
+                HTMLclass: 'nodeMain'
+            }
+        },
+
+        nodeStructure: {
+            text: {name: "блок"},
+            children: [
+                {
+                    text: {name: "1 блок"},
+                    children: [
+                        {
+                            text: {name: "1.1 блок"}
+                        },
+                        {
+                            text: {name: "1.2 блок"}
+                        }
+                    ]
+                },
+                {
+                    text: {name: "2 блок"},
+                    children: [
+                        {
+                            text: {name: "2.1 блок"}
+                        },
+                        {
+                            text: {name: "2.2 блок"}
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+
+    var myTreant = new Treant(simple_chart_config);
+
+    function showTreant(simpleConf) {
+        simple_chart_config.nodeStructure = simpleConf
+        myTreant.destroy();
+        myTreant = new Treant(simple_chart_config, null, $);
+    }
+
+    function setStatus(number, status, config) {
+        var id;
+        var startRecurs = false;
+        var emptyVar = false;
+        if (typeof number === 'string') {
+            if (number === '') {
+                emptyVar = true;
+            }
+            id = number.split('.')
+            startRecurs = true;
+        } else {
+            id = number
+        }
+        var count = id.length;
+        var num = id.shift();
+        if (count !== 0 && emptyVar === false) {
+            var newConfig = setStatus(id, status, config.children[Number(num)-1])
+        }
+        if (count === 0 || emptyVar === true) {
+            config.image = '/static/images/'+status+'.png';
+            if (emptyVar === false) {
+                return config
+            }
+        }
+        if (startRecurs === true) {
+            showTreant(config)
+            return
+        }
+        config.children[Number(num)-1] = newConfig;
+        return config
+
+
+
+    }
 
     $(document).ready(function () {
         $("#form1").submit(function (event) {
