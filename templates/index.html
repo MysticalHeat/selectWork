@@ -41,9 +41,6 @@
                 </div>
             </form>
             <div class="col">
-                <div id="tree-simple" style="width:335px; height: auto; margin: auto"></div>
-            </div>
-            <div class="col">
                 <div style="width:335px; height: 335px; margin: auto">
                     <canvas id="myChart"></canvas>
                 </div>
@@ -66,16 +63,16 @@
                         <th scope="col">№</th>
                         <th scope="col">Дата и время</th>
                         <th scope="col">date_time</th>
-                        <th scope="col">host</th>
-                        <th scope="col">version</th>
-                        <th scope="col">device_vendor</th>
-                        <th scope="col">device_product</th>
-                        <th scope="col">device_version</th>
-                        <th scope="col">signature_id</th>
-                        <th scope="col">name</th>
-                        <th scope="col">severity</th>
-                        <th scope="col">extension</th>
-                        <th scope="col">original_message</th>
+                        <th scope="col">Хост</th>
+                        <th scope="col">Версия</th>
+                        <th scope="col">Поставщик устройств</th>
+                        <th scope="col">Продукт</th>
+                        <th scope="col">Версия устройства</th>
+                        <th scope="col">Идентификатор подписи</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Приоритет</th>
+                        <th scope="col">Дополнительно</th>
+                        <th scope="col">Оригинал</th>
                     </tr>
                     </thead>
                 </table>
@@ -125,7 +122,7 @@
         }
     };
 
-    var myTreant = new Treant(simple_chart_config);
+
 
     function showTreant(simpleConf) {
         simple_chart_config.nodeStructure = simpleConf
@@ -163,8 +160,6 @@
         }
         config.children[Number(num)-1] = newConfig;
         return config
-
-
 
     }
 
