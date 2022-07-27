@@ -40,8 +40,9 @@
 
                 </div>
             </form>
+            <br>
             <div class="col">
-                <div id="tree-simple" style="width:335px; height: auto; margin: auto"></div>
+                <div id="tree" style="width:335px; height: auto"></div>
             </div>
             <div class="col">
                 <div style="width:335px; height: 335px; margin: auto">
@@ -88,6 +89,51 @@
 
     var table;
 
+    var tree = [
+        {
+            text: "Блок",
+            expanded: true,
+            nodes: [
+                {
+                    id: "block_1",
+                    text: "Блок 1",
+                    nodes: [
+                        {
+                            id: "block_11",
+                            text: "Блок 1.1"
+                        },
+                        {
+                            id: "block_12",
+                            text: "Блок 1.2"
+                        }
+                    ]
+                },
+                {
+                    id: "block_2",
+                    text: "Блок 2",
+                    nodes: [
+                        {
+                            id: "block_21",
+                            text: "Блок 2.1"
+                        },
+                        {
+                            id: "block_22",
+                            text: "Блок 2.2"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+
+
+    $('#tree').bstreeview(
+        {
+            data: tree,
+            expandIcon: 'fa fa-angle-down fa-fw',
+            collapseIcon: 'fa fa-angle-right fa-fw',
+        });
+
     var simple_chart_config = {
         chart: {
             container: "#tree-simple",
@@ -125,7 +171,7 @@
         }
     };
 
-    var myTreant = new Treant(simple_chart_config);
+    // var myTreant = new Treant(simple_chart_config);
 
     function showTreant(simpleConf) {
         simple_chart_config.nodeStructure = simpleConf
@@ -149,10 +195,10 @@
         var count = id.length;
         var num = id.shift();
         if (count !== 0 && emptyVar === false) {
-            var newConfig = setStatus(id, status, config.children[Number(num)-1])
+            var newConfig = setStatus(id, status, config.children[Number(num) - 1])
         }
         if (count === 0 || emptyVar === true) {
-            config.image = '/static/images/'+status+'.png';
+            config.image = '/static/images/' + status + '.png';
             if (emptyVar === false) {
                 return config
             }
@@ -161,9 +207,8 @@
             showTreant(config)
             return
         }
-        config.children[Number(num)-1] = newConfig;
+        config.children[Number(num) - 1] = newConfig;
         return config
-
 
 
     }
