@@ -1,6 +1,8 @@
 import workdb
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from datetime import datetime, timedelta
+import json
+import os
 
 app = Flask(__name__)
 db = workdb.SelectDatabase()
@@ -15,7 +17,7 @@ def do_none(req):
 
 def to_dict(data, count):
     return {
-        '#': count+1,
+        '#': count + 1,
         'writing_utc': str(data[1]),
         'date_time': str(data[2]),
         'host': data[3],
@@ -71,6 +73,30 @@ def index():
         return jsonify({'data': render_template('the_temp.html')})
     else:
         return render_template("index.html")
+
+
+@app.route('/download', methods=['POST', 'GET'])
+def download():
+    if request.method == "POST":
+        jsonData = request.form['data']
+        nData = json.loads(jsonData)
+        with open('download/cef.log', 'w') as file:
+            for row in nData:
+                file.write(row)
+        return send_file('download/cef.log', as_attachment=True)
+
+
+@app.route('/upload', methods=['POST', 'GET'])
+def upload():
+    if request.method == "POST":
+        dataFile = request.files['loadfile']
+        inputData = dataFile.read()
+        decData = inputData.decode('UTF-8').splitlines()
+        dataArr = []
+        for row in decData:
+            dataArr.append(row.split('|'))
+
+        return dataFile
 
 
 if __name__ == "__main__":

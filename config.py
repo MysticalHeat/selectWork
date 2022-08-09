@@ -1,0 +1,5 @@
+DB_HOST = "192.168.1.164"
+DB_DATABASE = "postgres"
+DB_USER = "postgres"
+DB_PORT = "5432"
+DB_PASSWORD = ""

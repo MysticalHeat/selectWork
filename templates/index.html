@@ -49,10 +49,19 @@
         </div>
         <div class="col-9">
             <div class="table-responsive">
+                <div class="row p-1">
+                    <div class="col">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-light" id="import" onclick="FindFile();">Импорт</button>
+                            <button type="button" class="btn btn-light" id="export">Экспорт</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col">
                         <div id="count">Количество строк: 0</div>
                     </div>
+
                     <div style="text-align:right" class="col-3">
                         <span style="cursor:pointer" class="toggle-vis">Отобразить/скрыть все колонки</span>
                     </div>
@@ -61,15 +70,15 @@
                     <thead>
                     <tr>
                         <th scope="col">№</th>
-                        <th scope="col">Дата и время</th>
-                        <th scope="col">date_time</th>
-                        <th scope="col">Хост</th>
+                        <th scope="col">Время записи</th>
+                        <th scope="col">Время события</th>
+                        <th scope="col">Источник</th>
                         <th scope="col">Версия</th>
                         <th scope="col">Поставщик устройств</th>
                         <th scope="col">Продукт</th>
                         <th scope="col">Версия устройства</th>
-                        <th scope="col">Идентификатор подписи</th>
-                        <th scope="col">Название</th>
+                        <th scope="col">Идентификатор события</th>
+                        <th scope="col">Наименование события</th>
                         <th scope="col">Приоритет</th>
                         <th scope="col">Дополнительно</th>
                         <th scope="col">Оригинал</th>
@@ -79,6 +88,14 @@
             </div>
         </div>
     </div>
+
+    <form id="form2" action="upload" target="rFrame" method="POST" enctype="multipart/form-data">
+        <div class="hiddenInput">
+            <input type="file" id="my_hidden_file" name="loadfile" onchange="LoadFile();">
+            <input type="submit" id="my_hidden_load" style="display: none" value='Загрузить'>
+        </div>
+    </form>
+    <iframe id="rFrame" name="rFrame" style="display: none"></iframe>
 
 </div>
 <script>
@@ -122,7 +139,64 @@
         }
     };
 
+    function FindFile () {document.getElementById('my_hidden_file').click();}
+    function LoadFile() { document.getElementById('my_hidden_load').click(); }
 
+    function upload(form_ajax) {
+        var form = $("#" + form_ajax);
+        var form_data = new FormData(form[0]);
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log('Success!');
+            }
+        });
+    }
+
+    function generateLoad() {
+        var load = [];
+        var stLoad = table.column(12).data().toArray();
+        var wr_t = table.column(1).data().toArray();
+
+        stLoad.forEach(function (item, index) {
+            var nTime = moment(wr_t[index]).format("MMM DD YYYY HH:mm:ss.SSSS");
+            load.push(item + ' wr_t=' + nTime + ' copied=1| \n');
+        });
+
+        return load;
+    }
+
+    function sendLoad() {
+        var jsonData = generateLoad();
+        var jsonString = JSON.stringify(jsonData);
+        $.ajax({
+            type: "POST",
+            url: "download",
+            data: {data: jsonString},
+            success: function (data) {
+                var blob = new Blob([data], {type: "application/octetstream"});
+                var isIE = false || !!document.documentMode;
+                if (isIE) {
+                    window.navigator.msSaveBlob(blob, 'cef.log');
+                } else {
+                    var url = window.URL || window.webkitURL;
+                    link = url.createObjectURL(blob);
+                    var a = $("<a />");
+                    a.attr("download", 'cef.log');
+                    a.attr("href", link);
+                    $("body").append(a);
+                    a[0].click();
+                    $("body").remove(a);
+                }
+            }
+        });
+    }
 
     function showTreant(simpleConf) {
         simple_chart_config.nodeStructure = simpleConf
@@ -146,10 +220,10 @@
         var count = id.length;
         var num = id.shift();
         if (count !== 0 && emptyVar === false) {
-            var newConfig = setStatus(id, status, config.children[Number(num)-1])
+            var newConfig = setStatus(id, status, config.children[Number(num) - 1])
         }
         if (count === 0 || emptyVar === true) {
-            config.image = '/static/images/'+status+'.png';
+            config.image = '/static/images/' + status + '.png';
             if (emptyVar === false) {
                 return config
             }
@@ -158,7 +232,7 @@
             showTreant(config)
             return
         }
-        config.children[Number(num)-1] = newConfig;
+        config.children[Number(num) - 1] = newConfig;
         return config
 
     }
@@ -166,6 +240,11 @@
     $(document).ready(function () {
         $("#form1").submit(function (event) {
             sendAjaxForm("form1");
+            event.preventDefault();
+        });
+
+        $("#form2").submit(function (event) {
+            upload("form2");
             event.preventDefault();
         });
 
@@ -219,6 +298,11 @@
             e.preventDefault();
             var columns = table.columns([2, 4, 6, 7, 9, 10, 12]);
             columns.visible(!columns.visible()[0]);
+        });
+
+        $('#export').on('click', function (e) {
+            e.preventDefault();
+            sendLoad();
         });
     });
 
@@ -334,7 +418,7 @@
                 url: '/',
                 data: 'validate=true',
                 success: function success(response) {
-                    $('caption').html('Количество строк: 0');
+                    $('#count').html('Количество строк: 0');
                     table
                         .clear()
                         .draw()

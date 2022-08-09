@@ -37,6 +37,29 @@ class SelectDatabase:
         )
         return connection
 
+    def insert_info(self, data):
+        """ Заполнение БД """
+
+        connection = None
+
+        try:
+            connection = self.connect()
+            cursor = connection.cursor()
+            info_str = ' and '.join(info)
+            select_info = f'SELECT * FROM public.table_cef WHERE {info_str} LIMIT 1000'
+            cursor.execute(select_info)
+            result = cursor.fetchall()
+            connection.commit()
+            print("Результат успешно возвращен")
+            return result
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
     def get_info(self, time=None, message=None):
         """ Выборка данных из БД """
 
