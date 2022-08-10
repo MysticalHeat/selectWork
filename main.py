@@ -2,7 +2,7 @@ import workdb
 from flask import Flask, render_template, request, jsonify, send_file
 from datetime import datetime, timedelta
 import json
-import os
+import re
 
 app = Flask(__name__)
 db = workdb.SelectDatabase()
@@ -94,9 +94,26 @@ def upload():
         decData = inputData.decode('UTF-8').splitlines()
         dataArr = []
         for row in decData:
-            dataArr.append(row.split('|'))
-
-        return dataFile
+            tempArr = row.split('|')
+            date_time, host, version = tempArr[0].rsplit(' ', 2)
+            _, version = version.split(':')
+            wr_t = re.findall(r'wr_t=(\w{3}\s\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\.\d{4,6})', tempArr[7])
+            dataArr.append((
+                datetime.strptime(wr_t[0], '%b %d %Y %H:%M:%S.%f'),
+                datetime.strptime(date_time, '%b %d %Y %H:%M:%S'),
+                host,
+                version,
+                tempArr[1],
+                tempArr[2],
+                tempArr[3],
+                tempArr[4],
+                tempArr[5],
+                tempArr[6],
+                tempArr[7],
+                row
+            ))
+        db.insert_info(dataArr)
+        return jsonify({'data': 'Its okey'})
 
 
 if __name__ == "__main__":

@@ -45,13 +45,22 @@ class SelectDatabase:
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            info_str = ' and '.join(info)
-            select_info = f'SELECT * FROM public.table_cef WHERE {info_str} LIMIT 1000'
-            cursor.execute(select_info)
-            result = cursor.fetchall()
-            connection.commit()
-            print("Результат успешно возвращен")
-            return result
+            query = "INSERT INTO public.table_cef (writing_utc, " \
+                    "date_time, " \
+                    "host, " \
+                    "version, " \
+                    "device_vendor, " \
+                    "device_product, " \
+                    "device_version, " \
+                    "signature_id, " \
+                    "name, " \
+                    "severity, " \
+                    "extension, " \
+                    "original_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            for row in data:
+                cursor.execute(query, row)
+                connection.commit()
+            print('Результат записан')
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
         finally:
