@@ -154,6 +154,7 @@
             cache: false,
             processData: false,
             success: function(data) {
+                $('#form2')[0].reset();
                 alert('Данные успешно записаны.');
             }
         });
@@ -166,7 +167,7 @@
 
         stLoad.forEach(function (item, index) {
             var nTime = moment(wr_t[index]).format("MMM DD YYYY HH:mm:ss.SSSS");
-            load.push(item + ' wr_t=' + nTime + ' copied=1| \n');
+            load.push(item + ' wr_t=' + nTime + ' copied=1|\n');
         });
 
         return load;

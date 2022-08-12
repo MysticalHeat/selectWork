@@ -94,6 +94,7 @@ def upload():
         decData = inputData.decode('UTF-8').splitlines()
         dataArr = []
         for row in decData:
+            row = row[:-1]
             tempArr = row.split('|')
             date_time, host, version = tempArr[0].rsplit(' ', 2)
             _, version = version.split(':')
