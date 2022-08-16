@@ -21,7 +21,8 @@
                        class="form-control form-control-sm"><br>
                 <select id="lasttime" name="lasttime" class="form-select form-select-sm"
                         aria-label=".form-select-sm example">
-                    <option selected disabled value="">За последнее время</option>
+                    <option selected disabled value="">За интервал времени</option>
+                    <option value="6">Последние 100 записей</option>
                     <option value="1">За последние 10 минут</option>
                     <option value="2">За последние 30 минут</option>
                     <option value="3">За последний час</option>
@@ -29,16 +30,27 @@
                     <option value="5">За последние 30 дней</option>
                 </select><br>
                 <div class="row">
-                    <div class="col">
+                    <div class="col-5">
                         <input type="submit" class="btn btn-primary" value="Применить">
                         <input type="reset" class="btn btn-secondary" value="Сбросить">
                     </div>
-                    <div class="col form-check form-switch">
+                    <div class="col-4 form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="autoUpdate">
                         <label class="form-check-label" for="autoUpdate">Авто-обновление</label>
                     </div>
-
                 </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <div class="btn-group-vertical">
+                            <button type="button" class="btn btn-info" id="import" onclick="FindFile();">Импорт сообщений из файла CEF
+                            </button>
+                            <button type="button" class="btn btn-info" id="export">Экспорт сообщений в файл CEF</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
             </form>
             <div class="col">
                 <div style="width:335px; height: 335px; margin: auto">
@@ -49,14 +61,6 @@
         </div>
         <div class="col-9">
             <div class="table-responsive">
-                <div class="row p-1">
-                    <div class="col">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-light" id="import" onclick="FindFile();">Импорт</button>
-                            <button type="button" class="btn btn-light" id="export">Экспорт</button>
-                        </div>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col">
                         <div id="count">Количество строк: 0</div>
@@ -139,8 +143,13 @@
         }
     };
 
-    function FindFile () {document.getElementById('my_hidden_file').click();}
-    function LoadFile() { document.getElementById('my_hidden_load').click(); }
+    function FindFile() {
+        document.getElementById('my_hidden_file').click();
+    }
+
+    function LoadFile() {
+        document.getElementById('my_hidden_load').click();
+    }
 
     function upload(form_ajax) {
         var form = $("#" + form_ajax);
@@ -153,7 +162,7 @@
             contentType: false,
             cache: false,
             processData: false,
-            success: function(data) {
+            success: function (data) {
                 $('#form2')[0].reset();
                 alert('Данные успешно записаны.');
             }
@@ -161,13 +170,34 @@
     }
 
     function generateLoad() {
-        var load = [];
-        var stLoad = table.column(12).data().toArray();
-        var wr_t = table.column(1).data().toArray();
+        var stLoad;
+        var form = $("#form1");
+        var arrForm = form.serializeArray();
+        var validate;
+        arrForm.forEach(function (item) {
+            if ((item === null || item === void 0 ? void 0 : item.value.length) > 0) {
+                validate = true;
+            }
+        });
 
-        stLoad.forEach(function (item, index) {
-            var nTime = moment(wr_t[index]).format("MMM DD YYYY HH:mm:ss.SSSS");
-            load.push(item + ' wr_t=' + nTime + ' copied=1|\n');
+        if (validate) {
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize() + '&dwnldreq=1',
+                async: false,
+                success: function success(response) {
+                    stLoad = response.data;
+                }
+            });
+        }
+
+        var load = [];
+
+
+        stLoad.forEach(function (item) {
+            var nTime = moment(item.writing_utc).format("MMM DD YYYY HH:mm:ss.SSSS");
+            load.push(item.original_message + ' wr_t=' + nTime + ' copied=1|\n');
         });
 
         return load;
@@ -186,10 +216,12 @@
                 if (isIE) {
                     window.navigator.msSaveBlob(blob, 'cef.log');
                 } else {
+                    var now = moment();
+                    var new_time = now.format('DD-MM-YYYY_HH-mm-SS')
                     var url = window.URL || window.webkitURL;
                     link = url.createObjectURL(blob);
                     var a = $("<a />");
-                    a.attr("download", 'cef.log');
+                    a.attr("download", 'cef_' + new_time + '.log');
                     a.attr("href", link);
                     $("body").append(a);
                     a[0].click();
@@ -326,6 +358,12 @@
     $('#time1').change(function () {
         $('#lasttime').val(null);
     });
+    $('#message').change(function () {
+        var val = document.getElementsByName('lasttime')[0].value;
+        if (val === '6') {
+            $('#lasttime').val(null);
+        }
+    });
     $('#lasttime').change(function () {
         var startDate = new Date();
         var now = new Date();
@@ -334,8 +372,8 @@
         switch (val) {
             case '1': {
                 startDate.setMinutes(startDate.getMinutes() - 10);
-                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy-MM-DDTHH:mm');
-                document.getElementsByName('time1')[0].value = moment(now).format('yyyy-MM-DDTHH:mm');
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
                 break;
             }
 
@@ -365,6 +403,11 @@
                 document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
                 document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
                 break;
+            }
+            case '6': {
+                $('#time0').val(null)
+                $('#time1').val(null)
+                $('#message').val(null)
             }
         }
     });

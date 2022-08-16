@@ -52,17 +52,26 @@ def index():
         time0 = do_none(request.form['time0'])
         time1 = do_none(request.form['time1'])
         message = do_none(request.form['message'])
+        lastrec = None
+        dwnldreq = None
+        if 'dwnldreq' in request.form:
+            dwnldreq = do_none(request.form['dwnldreq'])
         if 'lasttime' in request.form:
             lasttime = do_none(request.form['lasttime'])
-            time0 = last_time(int(lasttime))
-            time1 = datetime.now()
+            if int(lasttime) == 6:
+                lastrec = 100
+            else:
+                time0 = last_time(int(lasttime))
+                time1 = datetime.now()
         if time1 and time0 is None:
             time0 = '1970-01-01 00:00:00'
         if time0 and time1 is None:
             time1 = datetime.now()
         result = db.get_info(
             time=[time0, time1],
-            message=message
+            message=message,
+            lastrec=lastrec,
+            dwnldreq=dwnldreq
         )
         return jsonify({
             'data': [to_dict(row, count) for count, row in enumerate(result[::-1])],

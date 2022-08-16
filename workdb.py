@@ -4,7 +4,6 @@ import psycopg2
 from psycopg2 import Error
 
 
-
 class SelectDatabase:
     """ Класс для работы с базой данных """
 
@@ -69,12 +68,19 @@ class SelectDatabase:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
-    def get_info(self, time=None, message=None):
+    def get_info(self, time=None, message=None, lastrec=None, dwnldreq=None):
         """ Выборка данных из БД """
 
         connection = None
         raw_info = [time, message]
         info = []
+
+        if lastrec is None:
+            lastrec = 1000
+
+        if dwnldreq is not None:
+            lastrec = 'ALL'
+
         for i in range(len(raw_info)):
             k = raw_info[i]
             if None is not k:
@@ -86,8 +92,11 @@ class SelectDatabase:
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            info_str = ' and '.join(info)
-            select_info = f'SELECT * FROM public.table_cef WHERE {info_str} LIMIT 1000'
+            if info:
+                info_str = ' WHERE ' + ' and '.join(info)
+            else:
+                info_str = ''
+            select_info = f'SELECT * FROM public.table_cef{info_str} LIMIT {lastrec}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
