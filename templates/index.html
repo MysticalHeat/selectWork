@@ -21,8 +21,8 @@
                        class="form-control form-control-sm"><br>
                 <select id="lasttime" name="lasttime" class="form-select form-select-sm"
                         aria-label=".form-select-sm example">
-                    <option selected disabled value="">За интервал времени</option>
-                    <option value="6">Последние 100 записей</option>
+                    <option selected value="6">Последние 100 записей</option>
+                    <option value="">За интервал времени</option>
                     <option value="1">За последние 10 минут</option>
                     <option value="2">За последние 30 минут</option>
                     <option value="3">За последний час</option>
@@ -195,9 +195,13 @@
         var load = [];
 
 
-        stLoad.forEach(function (item) {
+        stLoad.slice().reverse().forEach(function (item) {
             var nTime = moment(item.writing_utc).format("MMM DD YYYY HH:mm:ss.SSSS");
-            load.push(item.original_message + ' wr_t=' + nTime + ' copied=1|\n');
+            if (!item.original_message.includes('wr_t')) {
+                load.push(item.original_message + ' wr_t=' + nTime + ' copied=1|\n');
+            } else {
+                load.push(item.original_message + '|\n')
+            }
         });
 
         return load;

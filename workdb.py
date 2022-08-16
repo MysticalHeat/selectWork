@@ -74,9 +74,13 @@ class SelectDatabase:
         connection = None
         raw_info = [time, message]
         info = []
+        orderrec = ''
 
         if lastrec is None:
             lastrec = 1000
+
+        if lastrec == 100:
+            orderrec = 'ORDER BY id DESC'
 
         if dwnldreq is not None:
             lastrec = 'ALL'
@@ -96,7 +100,7 @@ class SelectDatabase:
                 info_str = ' WHERE ' + ' and '.join(info)
             else:
                 info_str = ''
-            select_info = f'SELECT * FROM public.table_cef{info_str} LIMIT {lastrec}'
+            select_info = f'SELECT * FROM public.table_cef{info_str} {orderrec} LIMIT {lastrec}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
