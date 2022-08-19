@@ -82,7 +82,7 @@ class SelectDatabase:
         if lastrec == 100:
             orderrec = 'ORDER BY id DESC'
 
-        if dwnldreq is not None:
+        if dwnldreq is not None and lastrec != 100:
             lastrec = 'ALL'
 
         for i in range(len(raw_info)):
