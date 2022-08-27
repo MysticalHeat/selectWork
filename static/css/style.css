@@ -1,7 +1,8 @@
-.hiddenInput{
-      position:absolute;
-      overflow: hidden;
-      display:block;
-      height:0px;
-      width:0px;
-  }
+.hiddenInput {
+    position: absolute;
+    overflow: hidden;
+    display: block;
+    height: 0px;
+    width: 0px;
+}
+
