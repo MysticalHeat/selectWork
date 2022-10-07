@@ -75,12 +75,14 @@ class SelectDatabase:
         raw_info = [time, message]
         info = []
         orderrec = ''
+        reversedTuple = False
 
         if lastrec is None:
             lastrec = 1000
 
         if lastrec == 100:
             orderrec = 'ORDER BY id DESC'
+            reversedTuple = True
 
         if dwnldreq is not None and lastrec != 100:
             lastrec = 'ALL'
@@ -105,6 +107,8 @@ class SelectDatabase:
             result = cursor.fetchall()
             connection.commit()
             print("Результат успешно возвращен")
+            if reversedTuple:
+                result = tuple(reversed(result))
             return result
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
