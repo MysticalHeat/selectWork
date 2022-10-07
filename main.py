@@ -58,11 +58,12 @@ def index():
             dwnldreq = do_none(request.form['dwnldreq'])
         if 'lasttime' in request.form:
             lasttime = do_none(request.form['lasttime'])
-            if int(lasttime) == 6:
-                lastrec = 100
-            else:
-                time0 = last_time(int(lasttime))
-                time1 = datetime.now()
+            if lasttime is not None:
+                if int(lasttime) == 6:
+                    lastrec = 100
+                else:
+                    time0 = last_time(int(lasttime))
+                    time1 = datetime.now()
         if time1 and time0 is None:
             time0 = '1970-01-01 00:00:00'
         if time0 and time1 is None:

@@ -93,7 +93,7 @@ class SelectDatabase:
                 if i == 0 and (time[0] and time[1]) is not None:
                     info.append(f"writing_utc BETWEEN '{time[0]}' and '{time[1]}'")
                 if i == 1:
-                    info.append(f"to_tsvector(original_message) @@ to_tsquery('{message}')")
+                    info.append(f"original_message LIKE '%{message}%'")
 
         try:
             connection = self.connect()
