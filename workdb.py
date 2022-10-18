@@ -68,7 +68,25 @@ class SelectDatabase:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
-    def get_info(self, time=None, message=None, lastrec=None, dwnldreq=None):
+    def insert_processed_data(self, data):
+        connection = None
+
+        try:
+            connection = self.connect()
+            cursor = connection.cursor()
+            query = "INSERT INTO public.table_cef_processed (processed_id, severity) VALUES (%s, %s);"
+            cursor.execute(query, data)
+            connection.commit()
+            print('Результат записан')
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    def get_info(self, time=None, message=None, lastrec=None, dwnldreq=None, select_proc=None):
         """ Выборка данных из БД """
 
         connection = None
@@ -76,6 +94,7 @@ class SelectDatabase:
         info = []
         orderrec = ''
         reversedTuple = False
+        info_table = ''
 
         if lastrec is None:
             lastrec = 1000
@@ -87,13 +106,16 @@ class SelectDatabase:
         if dwnldreq is not None and lastrec != 100:
             lastrec = 'ALL'
 
-        for i in range(len(raw_info)):
-            k = raw_info[i]
-            if None is not k:
-                if i == 0 and (time[0] and time[1]) is not None:
-                    info.append(f"writing_utc BETWEEN '{time[0]}' and '{time[1]}'")
-                if i == 1:
-                    info.append(f"original_message LIKE '%{message}%'")
+        if select_proc is not None:
+            info_table = '_processed'
+        else:
+            for i in range(len(raw_info)):
+                k = raw_info[i]
+                if None is not k:
+                    if i == 0 and (time[0] and time[1]) is not None:
+                        info.append(f"writing_utc BETWEEN '{time[0]}' and '{time[1]}'")
+                    if i == 1:
+                        info.append(f"original_message LIKE '%{message}%'")
 
         try:
             connection = self.connect()
@@ -102,7 +124,7 @@ class SelectDatabase:
                 info_str = ' WHERE ' + ' and '.join(info)
             else:
                 info_str = ''
-            select_info = f'SELECT * FROM public.table_cef{info_str} {orderrec} LIMIT {lastrec}'
+            select_info = f'SELECT * FROM public.table_cef{info_table}{info_str} {orderrec} LIMIT {lastrec}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
@@ -118,13 +140,27 @@ class SelectDatabase:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
-    def get_count(self):
+    def get_count(self, severity=None, processed=None):
         """ Получение количества строк из БД """
         connection = None
+        info_str = None
+        info_table = None
+
+        if severity is not None:
+            info_str = f' WHERE severity={severity}'
+        else:
+            info_str = ''
+
+        if processed is not None:
+            info_table = '_processed'
+        else:
+            info_table = ''
+
+
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            select_info = 'SELECT COUNT(*) FROM public.table_cef'
+            select_info = f'SELECT COUNT(*) FROM public.table_cef{info_table}{info_str}'
             cursor.execute(select_info)
             result = cursor.fetchone()
             connection.commit()

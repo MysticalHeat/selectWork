@@ -1,11 +1,13 @@
 import workdb
 from flask import Flask, render_template, request, jsonify, send_file
 from datetime import datetime, timedelta
+from flask_cors import CORS
 import json
 import re
 
 app = Flask(__name__)
 db = workdb.SelectDatabase()
+CORS(app)
 
 
 def do_none(req):
@@ -29,7 +31,16 @@ def to_dict(data, count):
         'name': data[9],
         'severity': data[10],
         'extension': data[11],
-        'original_message': data[12]
+        'original_message': data[12],
+        'id': data[0]
+    }
+
+
+def to_proc_dict(data):
+    return {
+        'id': data[0],
+        'processed_id': data[1],
+        'severity': data[2]
     }
 
 
@@ -48,6 +59,35 @@ def last_time(lasttime):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
+    if request.method == "POST" and 'select_processed' in request.form:
+        return jsonify({'data': [to_proc_dict(row) for row in db.get_info(select_proc=True)]})
+
+    if request.method == "POST" and 'processed' in request.form:
+        return jsonify({
+            'severity': [
+                db.get_count(severity=1, processed=True),
+                db.get_count(severity=2, processed=True),
+                db.get_count(severity=3, processed=True),
+                db.get_count(severity=4, processed=True)
+            ]
+        })
+
+    if request.method == "POST" and 'processed_id' in request.form:
+        processed_id = request.form['processed_id']
+        severity = request.form['severity']
+        db.insert_processed_data([processed_id, severity])
+        return jsonify({'result': 'ok'})
+
+    if request.method == "POST" and 'count_severity' in request.form:
+        return jsonify({
+            'severity': [
+                db.get_count(severity=1),
+                db.get_count(severity=2),
+                db.get_count(severity=3),
+                db.get_count(severity=4)
+            ]
+        })
+
     if request.method == "POST" and 'validate' not in request.form:
         time0 = do_none(request.form['time0'])
         time1 = do_none(request.form['time1'])
@@ -77,12 +117,13 @@ def index():
         return jsonify({
             'data': [to_dict(row, count) for count, row in enumerate(result[::-1])],
             'resp_count': len(result),
-            'db_count': db.get_count()}
+            'db_count': db.get_count()
+        }
         )
     elif 'validate' in request.form:
         return jsonify({'data': render_template('the_temp.html')})
     else:
-        return render_template("index.html")
+        return render_template("events.html")
 
 
 @app.route('/download', methods=['POST', 'GET'])

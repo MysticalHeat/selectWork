@@ -1,0 +1,502 @@
+{% extends 'index.html' %}
+
+{% block title %}
+Главная страница
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-3">
+            <h1>Выборка из бд</h1>
+            <form action="/" id="form1" method="post">
+                <div class="input-group">
+                    <span class="input-group-text">c</span><input type="text" name="time0" id="time0"
+                                                                  class="form-control form-control-sm">
+                    <span class="input-group-text">по</span><input type="text" name="time1" id="time1"
+                                                                   class="form-control form-control-sm">
+                </div>
+                <br>
+                <input type="text" name="message" id="message" placeholder="сообщение"
+                       class="form-control form-control-sm"><br>
+                <select id="lasttime" name="lasttime" class="form-select form-select-sm"
+                        aria-label=".form-select-sm example">
+                    <option selected value="6">Последние 100 записей</option>
+                    <option value="">За интервал времени</option>
+                    <option value="1">За последние 10 минут</option>
+                    <option value="2">За последние 30 минут</option>
+                    <option value="3">За последний час</option>
+                    <option value="4">За последние сутки</option>
+                    <option value="5">За последние 30 дней</option>
+                </select><br>
+                <div class="row">
+                    <div class="col-5">
+                        <input type="submit" class="btn btn-primary" value="Применить">
+                        <input type="reset" class="btn btn-secondary" value="Сбросить">
+                    </div>
+                    <div class="col-4 form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="autoUpdate">
+                        <label class="form-check-label" for="autoUpdate">Авто-обновление</label>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <div class="btn-group-vertical">
+                            <button type="button" class="btn btn-info" id="import" onclick="FindFile();">Импорт
+                                сообщений из файла CEF
+                            </button>
+                            <button type="button" class="btn btn-info" id="export">Экспорт сообщений в файл CEF</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+            </form>
+            <div class="col">
+                <div style="width:335px; height: 335px; margin: auto">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-9">
+            <div class="">
+                <div class="row">
+                    <div class="col">
+                        <div id="count">Количество строк: 0</div>
+                    </div>
+
+                    <div style="text-align:right" class="col-3">
+                        <span style="cursor:pointer" class="toggle-vis">Отобразить/скрыть все колонки</span>
+                    </div>
+                </div>
+                <div id="tabledrag">
+                    <table id="table" class="table table-striped table-sm caption-top">
+                        <thead>
+                        <tr>
+                            <th scope="col">№</th>
+                            <th scope="col">Время записи</th>
+                            <th scope="col">Время события</th>
+                            <th scope="col">Источник</th>
+                            <th scope="col">Версия</th>
+                            <th scope="col">Поставщик устройств</th>
+                            <th scope="col">Продукт</th>
+                            <th scope="col">Версия устройства</th>
+                            <th scope="col">Идентификатор события</th>
+                            <th scope="col">Наименование события</th>
+                            <th scope="col">Приоритет</th>
+                            <th scope="col">Дополнительно</th>
+                            <th scope="col">Оригинал</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="form2" action="upload" target="rFrame" method="POST" enctype="multipart/form-data">
+        <div class="hiddenInput">
+            <input type="file" id="my_hidden_file" name="loadfile" onchange="LoadFile();">
+            <input type="submit" id="my_hidden_load" style="display: none" value='Загрузить'>
+        </div>
+    </form>
+    <iframe id="rFrame" name="rFrame" style="display: none"></iframe>
+
+</div>
+<script>
+
+    var table;
+
+    var simple_chart_config = {
+        chart: {
+            container: "#tree-simple",
+            node: {
+                HTMLclass: 'nodeMain'
+            }
+        },
+
+        nodeStructure: {
+            text: {name: "блок"},
+            children: [
+                {
+                    text: {name: "1 блок"},
+                    children: [
+                        {
+                            text: {name: "1.1 блок"}
+                        },
+                        {
+                            text: {name: "1.2 блок"}
+                        }
+                    ]
+                },
+                {
+                    text: {name: "2 блок"},
+                    children: [
+                        {
+                            text: {name: "2.1 блок"}
+                        },
+                        {
+                            text: {name: "2.2 блок"}
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+
+
+    function FindFile() {
+        document.getElementById('my_hidden_file').click();
+    }
+
+    function LoadFile() {
+        document.getElementById('my_hidden_load').click();
+    }
+
+    function upload(form_ajax) {
+        var form = $("#" + form_ajax);
+        var form_data = new FormData(form[0]);
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function (data) {
+                $('#form2')[0].reset();
+                alert('Данные успешно записаны.');
+            }
+        });
+    }
+
+    function generateLoad() {
+        var stLoad;
+        var form = $("#form1");
+        var arrForm = form.serializeArray();
+        var validate;
+        arrForm.forEach(function (item) {
+            if ((item === null || item === void 0 ? void 0 : item.value.length) > 0) {
+                validate = true;
+            }
+        });
+
+        if (validate) {
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize() + '&dwnldreq=1',
+                async: false,
+                success: function success(response) {
+                    stLoad = response.data;
+                }
+            });
+        }
+
+        var load = [];
+
+
+        stLoad.slice().reverse().forEach(function (item) {
+            var nTime = moment(item.writing_utc).format("MMM DD YYYY HH:mm:ss.SSSS");
+            if (!item.original_message.includes('wr_t')) {
+                load.push(item.original_message + ' wr_t=' + nTime + ' copied=1|\n');
+            } else {
+                load.push(item.original_message + '|\n')
+            }
+        });
+
+        return load;
+    }
+
+    function sendLoad() {
+        var jsonData = generateLoad();
+        var jsonString = JSON.stringify(jsonData);
+        $.ajax({
+            type: "POST",
+            url: "download",
+            data: {data: jsonString},
+            success: function (data) {
+                var blob = new Blob([data], {type: "application/octetstream"});
+                var isIE = false || !!document.documentMode;
+                if (isIE) {
+                    window.navigator.msSaveBlob(blob, 'cef.log');
+                } else {
+                    var now = moment();
+                    var new_time = now.format('DD-MM-YYYY_HH-mm-SS')
+                    var url = window.URL || window.webkitURL;
+                    link = url.createObjectURL(blob);
+                    var a = $("<a />");
+                    a.attr("download", 'cef_' + new_time + '.log');
+                    a.attr("href", link);
+                    $("body").append(a);
+                    a[0].click();
+                    $("body").remove(a);
+                }
+            }
+        });
+    }
+
+    function showTreant(simpleConf) {
+        simple_chart_config.nodeStructure = simpleConf
+        myTreant.destroy();
+        myTreant = new Treant(simple_chart_config, null, $);
+    }
+
+
+    function setStatus(number, status, config) {
+        var id;
+        var startRecurs = false;
+        var emptyVar = false;
+        if (typeof number === 'string') {
+            if (number === '') {
+                emptyVar = true;
+            }
+            id = number.split('.')
+            startRecurs = true;
+        } else {
+            id = number
+        }
+        var count = id.length;
+        var num = id.shift();
+        if (count !== 0 && emptyVar === false) {
+            var newConfig = setStatus(id, status, config.children[Number(num) - 1])
+        }
+        if (count === 0 || emptyVar === true) {
+            config.image = '/static/images/' + status + '.png';
+            if (emptyVar === false) {
+                return config
+            }
+        }
+        if (startRecurs === true) {
+            showTreant(config)
+            return
+        }
+        config.children[Number(num) - 1] = newConfig;
+        return config
+
+    }
+
+    $(document).ready(function () {
+        $("#form1").submit(function (event) {
+            sendAjaxForm("form1");
+            event.preventDefault();
+        });
+
+        $("#form2").submit(function (event) {
+            upload("form2");
+            event.preventDefault();
+        });
+
+
+        table = $('#table').DataTable(
+            {
+                language: {
+                    url: '/static/js/datatables.ru.json'
+                },
+                searching: false,
+                autoWidth: false,
+                paging: true,
+                info: false,
+                scrollX: true,
+                lengthMenu: [20, 50, 100],
+                columns: [
+                    {data: '#'},
+                    {data: 'writing_utc'},
+                    {
+                        data: 'date_time',
+                        visible: false
+                    },
+                    {data: 'host'},
+                    {
+                        data: 'version',
+                        visible: false
+                    },
+                    {data: 'device_vendor'},
+                    {
+                        data: 'device_product',
+                        visible: false
+                    },
+                    {
+                        data: 'device_version',
+                        visible: false
+                    },
+                    {data: 'signature_id'},
+                    {
+                        data: 'name',
+                        visible: false
+                    },
+                    {
+                        data: 'severity',
+                        visible: false
+                    },
+                    {data: 'extension'},
+                    {
+                        data: 'original_message',
+                        visible: false
+                    }
+                ],
+
+
+            }
+        );
+
+
+
+        $('span.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+            var columns = table.columns([2, 4, 6, 7, 9, 10, 12]);
+            columns.visible(!columns.visible()[0]);
+        });
+
+        $('#export').on('click', function (e) {
+            e.preventDefault();
+            sendLoad();
+        });
+
+        $('#table').dragScroll();
+    });
+
+
+    var timer;
+    $('#autoUpdate').change(function () {
+        var chkbx = document.getElementById('autoUpdate');
+        if (chkbx.checked) {
+            timer = setInterval(sendAjaxForm, 5000, 'form1');
+        } else {
+            clearInterval(timer);
+        }
+    });
+    $.datetimepicker.setLocale('ru');
+    $('#time0').datetimepicker();
+    $('#time1').datetimepicker();
+    $('#time0').change(function () {
+        $('#lasttime').val(null);
+    });
+    $('#time1').change(function () {
+        $('#lasttime').val(null);
+    });
+    $('#message').change(function () {
+        var val = document.getElementsByName('lasttime')[0].value;
+        if (val === '6') {
+            $('#lasttime').val(null);
+        }
+    });
+    $('#lasttime').change(function () {
+        var startDate = new Date();
+        var now = new Date();
+        var val = document.getElementsByName('lasttime')[0].value;
+
+        switch (val) {
+            case '1': {
+                startDate.setMinutes(startDate.getMinutes() - 10);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
+                break;
+            }
+
+            case '2': {
+                startDate.setMinutes(startDate.getMinutes() - 30);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
+                break;
+            }
+
+            case '3': {
+                startDate.setHours(startDate.getHours() - 1);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
+                break;
+            }
+
+            case '4': {
+                startDate.setHours(startDate.getHours() - 24);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
+                break;
+            }
+
+            case '5': {
+                startDate.setDate(startDate.getDate() - 30);
+                document.getElementsByName('time0')[0].value = moment(startDate).format('yyyy/MM/DD HH:mm');
+                document.getElementsByName('time1')[0].value = moment(now).format('yyyy/MM/DD HH:mm');
+                break;
+            }
+            case '6': {
+                $('#time0').val(null)
+                $('#time1').val(null)
+                $('#message').val(null)
+            }
+        }
+    });
+
+    var data = {
+        labels: [],
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: ['rgb(83,95,201)', 'rgb(255,0,0)'],
+            borderColor: ['rgb(83,95,201)', 'rgb(255,0,0)'],
+            data: []
+        }]
+    };
+    var config = {
+        type: 'doughnut',
+        data: data
+    };
+    var myChart = new Chart(document.getElementById('myChart'), config);
+
+    function sendAjaxForm(form_ajax) {
+        var form = $("#" + form_ajax);
+        var arrForm = form.serializeArray();
+        var validate;
+        arrForm.forEach(function (item) {
+            if ((item === null || item === void 0 ? void 0 : item.value.length) > 0) {
+                validate = true;
+            }
+        });
+
+        if (validate) {
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function success(response) {
+                    $('#count').html('Количество строк: ' + response.db_count + ' Отображено: ' + response.resp_count);
+                    table
+                        .clear()
+                        .rows.add(response.data.slice(0, 1000))
+                        .draw();
+                    myChart.data.labels = ['Response', 'All'];
+                    myChart.data.datasets[0].data = [response.resp_count, response.db_count - response.resp_count];
+                    myChart.update();
+                },
+                error: function error(_error) {
+                    console.log(_error);
+                }
+            });
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: '/',
+                data: 'validate=true',
+                success: function success(response) {
+                    $('#count').html('Количество строк: 0');
+                    table
+                        .clear()
+                        .draw()
+                    myChart.data.labels = [];
+                    myChart.data.datasets[0].data = [];
+                    myChart.update();
+                },
+                error: function error(_error2) {
+                    console.log(_error2);
+                }
+            });
+        }
+    }
+
+
+</script>
+{% endblock %}
