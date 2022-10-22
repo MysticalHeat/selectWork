@@ -3,8 +3,8 @@
     <div class="row">
       <div class="col">
         <nav class="nav nav-fill">
-          <a id="status" class="nav-link" @click="tabChange('status')">Состояниe</a>
-          <a id="events" class="nav-link active" @click="tabChange('events')">События</a>
+          <a id="status" class="nav-link active" @click="tabChange('status')">Состояниe</a>
+          <a id="events" class="nav-link" @click="tabChange('events')">События</a>
           <a id="settings" class="nav-link" @click="tabChange('settings')">Настройки</a>
         </nav>
       </div>
@@ -24,6 +24,13 @@ export default {
     tabChange(id) {
       $('a').removeClass('active');
       $('#' + id).addClass('active');
+      if (id === 'status') {
+        $('.main').hide();
+        $('.statusPage').show();
+      } else if (id === 'events') {
+        $('.statusPage').hide();
+        $('.main').show();
+      }
     }
   }
 }

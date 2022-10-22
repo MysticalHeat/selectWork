@@ -23,7 +23,10 @@
           <div class="row menuBar">
             <menu-bar v-bind:status="status"></menu-bar>
           </div>
-          <div class="row main">
+          <div class="row statusPage">
+            <status-page></status-page>
+          </div>
+          <div class="row main" style="display: none">
             <event-form @updateStatus="setStatus" @updateProcData="setProcData" v-bind:procData="procData"></event-form>
           </div>
         </div>
@@ -38,6 +41,7 @@ import navBar from "@/components/navBar";
 import menuBar from "@/components/menuBar";
 import eventForm from "@/pages/eventForm";
 import messageDialog from "@/components/messageDialog";
+import statusPage from "@/pages/statusPage"
 
 
 export default {
@@ -45,7 +49,8 @@ export default {
     navBar,
     menuBar,
     eventForm,
-    messageDialog
+    messageDialog,
+    statusPage
   },
   data() {
     return {
@@ -82,6 +87,7 @@ export default {
 @import '../public/resources/css/Treant.css';
 @import '../public/resources/css/perfect-scrollbar.css';
 @import '../public/resources/css/style.css';
+@import '../public/resources/css/treeview.min.css';
 
 .navigBar {
   width: 64px;
@@ -114,6 +120,26 @@ export default {
 
 .main {
   margin: 0 12px;
+}
+
+.statusPage {
+  margin: 0 12px;
+}
+
+
+.circles {
+  background-color: red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  float: left;
+  margin: 3px;
+  width: 15px;
+  height: 15px;
+  -moz-border-radius: 50px;
+  -webkit-border-radius: 50px;
+  border-radius: 50px;
+  position: absolute;
 }
 
 
