@@ -3,7 +3,6 @@ import config  # подключаем файл config.py с данным от Б
 import psycopg2
 from psycopg2 import Error
 
-
 class SelectDatabase:
     """ Класс для работы с базой данных """
 

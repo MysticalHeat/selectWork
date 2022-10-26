@@ -7,9 +7,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
       </div>
       <div class="modal-body">
-        ID = {{ this.procData.id }} Важность = {{ this.procData.sev }}
+        ID = {{ this.procData.id }} Важность = {{ this.procData.sev }} Владелец = {{ this.procData.parent }} Название = {{ this.procData.name }}
       </div>
       <div class="modal-footer">
+        <button type="button" id="isDeviceExist" class="btn btn-primary" disabled>Добавить</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
         <button type="button" id="procDataSubmit" class="btn btn-primary">Пометить как обработанное</button>
       </div>
@@ -24,7 +25,7 @@
             <menu-bar v-bind:status="status"></menu-bar>
           </div>
           <div class="row statusPage">
-            <status-page></status-page>
+            <status-page v-bind:procData="procData"></status-page>
           </div>
           <div class="row main" style="display: none">
             <event-form @updateStatus="setStatus" @updateProcData="setProcData" v-bind:procData="procData"></event-form>
@@ -61,8 +62,11 @@ export default {
         very_low: 0
       },
       procData: {
-        id: 0,
-        sev: 0
+        id: null,
+        sev: null,
+        device_id: null,
+        parent: null,
+        name: null
       }
     }
   },
@@ -75,6 +79,10 @@ export default {
     setProcData(data) {
       this.procData.id = data.id;
       this.procData.sev = data.severity;
+      var test = data.extension.match(/device_id=(.*)\sdevice_parent=(.*)\sdevice_name=(.*)\sw/);
+      this.procData.device_id = test[1];
+      this.procData.parent = test[2];
+      this.procData.name = test[3];
     }
   }
 }
@@ -128,7 +136,7 @@ export default {
 
 
 .circles {
-  background-color: red;
+  background-color: limegreen;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -3,17 +3,32 @@
     <div class=""></div>
   </div>
   <div class="col-9 status">
-    <div style="background-color: red" class="circle">
-      <div class="textCir"> {{ status.high }} </div>
+    <div>
+      <div style="background-color: red" class="circle">
+        <div class="textCir"> {{ status.high }}</div>
+      </div>
+      <span v-if="status.high > 0" class="badge badge-pill bg-primary p-2 rounded-circle border border-light count-notif">
+        <span class="visually-hidden">New alerts</span>
+      </span>
     </div>
-    <div style="background-color: orange" class="circle">
-      <div class="textCir"> {{ status.mid }} </div>
+    <div>
+      <div style="background-color: orange" class="circle">
+        <div class="textCir"> {{ status.mid }}</div>
+      </div>
+      <span v-if="status.mid > 0" class="badge badge-pill bg-primary p-2 rounded-circle border border-light count-notif">
+        <span class="visually-hidden">New alerts</span>
+      </span>
     </div>
-    <div style="background-color: yellow" class="circle">
-      <div class="textCir"> {{ status.low }} </div>
+    <div>
+      <div style="background-color: yellow" class="circle">
+        <div class="textCir"> {{ status.low }}</div>
+      </div>
+      <span v-if="status.low > 0" class="badge badge-pill bg-primary p-2 rounded-circle border border-light count-notif">
+        <span class="visually-hidden">New alerts</span>
+      </span>
     </div>
     <div style="background-color: green" class="circle">
-      <div class="textCir"> {{ status.very_low }} </div>
+      <div class="textCir"> {{ status.very_low }}</div>
     </div>
   </div>
 </template>
@@ -49,6 +64,7 @@ export default {
 }
 
 .circle {
+  background-color: lightgrey;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -60,5 +76,12 @@ export default {
   -webkit-border-radius: 50px;
   border-radius: 50px;
   font-size: 18px;
+}
+
+.count-notif {
+  vertical-align: middle;
+  margin-left: -32px;
+  margin-top: 10px;
+  font-size: 13px;
 }
 </style>

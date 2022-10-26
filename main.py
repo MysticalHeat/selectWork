@@ -62,29 +62,19 @@ def index():
     if request.method == "POST" and 'select_processed' in request.form:
         return jsonify({'data': [to_proc_dict(row) for row in db.get_info(select_proc=True)]})
 
-    if request.method == "POST" and 'processed' in request.form:
-        return jsonify({
-            'severity': [
-                db.get_count(severity=1, processed=True),
-                db.get_count(severity=2, processed=True),
-                db.get_count(severity=3, processed=True),
-                db.get_count(severity=4, processed=True)
-            ]
-        })
-
     if request.method == "POST" and 'processed_id' in request.form:
         processed_id = request.form['processed_id']
         severity = request.form['severity']
         db.insert_processed_data([processed_id, severity])
         return jsonify({'result': 'ok'})
 
-    if request.method == "POST" and 'count_severity' in request.form:
+    if request.method == "POST" and 'count_severity' and 'processed' in request.form:
         return jsonify({
             'severity': [
-                db.get_count(severity=1),
-                db.get_count(severity=2),
-                db.get_count(severity=3),
-                db.get_count(severity=4)
+                db.get_count(severity=1) - db.get_count(severity=1, processed=True),
+                db.get_count(severity=2) - db.get_count(severity=2, processed=True),
+                db.get_count(severity=3) - db.get_count(severity=3, processed=True),
+                db.get_count(severity=4) - db.get_count(severity=4, processed=True)
             ]
         })
 
@@ -135,6 +125,34 @@ def download():
             for row in nData:
                 file.write(row)
         return send_file('download/cef.log', as_attachment=True)
+
+
+@app.route('/send_imitator', methods=['POST', 'GET'])
+def send_imitator():
+    if request.method == "POST":
+        reqSeverity = request.json['device_severity']
+        reqDeviceId, reqDeviceParent, reqDeviceName = request.json['device_select'].split(' _')
+        dataArr = [(
+            datetime.now(),
+            datetime.now(),
+            'IDS',
+            0,
+            'OOO SFERA',
+            'IDS NET',
+            '1.0',
+            '1:2101411:13',
+            'GPL SNMP public access udp',
+            reqSeverity,
+            'rt=Feb 02 2022 19:22:46.732615 +0300 cn1=-1347478879 cn1Label=alert src=10.145.9.125 spt=61292 '
+            'dst=172.21.172.233 dpt=161 proto=UDP device_id={0} device_parent={1} device_name={2} wr_t=Aug 16 2022 '
+            '18:58:52.2900 copied=1'.format(reqDeviceId, reqDeviceParent, reqDeviceName),
+            'Feb 02 2022 19:22:46 IDS CEF:0|OOO SFERA|IDSnet|1.0|1:2101411:13|GPL SNMP public access udp|2|rt=Feb 02 '
+            '2022 19:22:46.732615 +0300 cn1=-1347478879 cn1Label=alert src=10.145.9.125 spt=61292 dst=172.21.172.233 '
+            'dpt=161 proto=UDP device_id={0} device_parent={1} device_name={2}'
+            ' wr_t=Aug 16 2022 18:58:52.2900 copied=1'.format(reqDeviceId, reqDeviceParent, reqDeviceName)
+        )]
+        db.insert_info(dataArr)
+        return jsonify({'data': 'its okay'})
 
 
 @app.route('/upload', methods=['POST', 'GET'])

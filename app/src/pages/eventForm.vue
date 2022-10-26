@@ -106,6 +106,7 @@
 
 <script>
 import * as eventRdy from './events'
+import axios from "axios";
 
 var data = {
   labels: [],
@@ -176,6 +177,21 @@ export default {
           console.log(error)
         }
       })
+    },
+    axi_status() {
+      $.ajax({
+        type: 'POST',
+        url: 'http://' + this.curHost + '/',
+        data: 'count_severity=true&processed=true',
+        success: data => {
+          var counter = 0;
+          for (var key in status) {
+            status[key] = data.severity[counter];
+            counter += 1;
+          }
+        }
+      })
+      this.$emit('updateStatus', status);
     }
   },
   mounted() {
@@ -270,35 +286,7 @@ export default {
       thisRow = this;
     });
 
-    $.ajax({
-      type: 'POST',
-      url: 'http://' + this.curHost + '/',
-      async: false,
-      data: 'count_severity=true',
-      success: data => {
-        var counter = 0;
-        for (var key in status) {
-          status[key] = data.severity[counter];
-          counter += 1;
-        }
-      }
-    })
-
-    $.ajax({
-      type: 'POST',
-      url: 'http://' + this.curHost + '/',
-      data: 'processed=True',
-      async: false,
-      success: data => {
-        var counter = 0;
-        for (var key in status) {
-          status[key] -= data.severity[counter];
-          counter += 1;
-        }
-      }
-    });
-
-    this.$emit('updateStatus', status);
+    setInterval(this.axi_status, 500);
 
     $('#procDataSubmit').click(function () {
       if (!processed_data.find(o => o.processed_id === table.row(thisRow).data()['id'])) {
@@ -328,52 +316,11 @@ export default {
             }
           }
         });
-        self.$emit('updateStatus', status);
         $(thisRow).addClass('read');
-        processed_data.push({processed_id: self.procData.id})
+        processed_data.push({processed_id: self.procData.id});
       }
       $('#exampleModal').modal('hide');
     })
-
-
-    var simple_chart_config = {
-      chart: {
-        container: "#tree-simple",
-        node: {
-          HTMLclass: 'nodeMain'
-        }
-      },
-
-      nodeStructure: {
-        text: {name: "блок"},
-        children: [
-          {
-            text: {name: "1 блок"},
-            children: [
-              {
-                text: {name: "1.1 блок"}
-              },
-              {
-                text: {name: "1.2 блок"}
-              }
-            ]
-          },
-          {
-            text: {name: "2 блок"},
-            children: [
-              {
-                text: {name: "2.1 блок"}
-              },
-              {
-                text: {name: "2.2 блок"}
-              }
-            ]
-          }
-        ]
-      }
-    };
-
-    // $('#table').dragScroll();
 
     $(window).resize(function () {
       $('.dataTables_scrollBody').css('height', ($(window).height() - 300));
@@ -386,7 +333,7 @@ export default {
     $('#autoUpdate').change(function () {
       var chkbx = document.getElementById('autoUpdate');
       if (chkbx.checked) {
-        timer = setInterval(eventRdy.sendAjaxForm, 5000, ['form1', this.curHost, myChart, table]);
+        timer = setInterval(eventRdy.sendAjaxForm, 5000, 'form1', self.curHost, myChart, table);
       } else {
         clearInterval(timer);
       }

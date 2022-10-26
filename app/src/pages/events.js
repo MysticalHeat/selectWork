@@ -41,7 +41,6 @@ function generateLoad() {
 
   var load = [];
 
-
   stLoad.slice().reverse().forEach(function (item) {
     var nTime = moment(item.writing_utc).format("MMM DD YYYY HH:mm:ss.SSSS");
     if (!item.original_message.includes('wr_t')) {
@@ -171,8 +170,6 @@ export function sendAjaxForm(form_ajax, curHost, myChart, table) {
     });
   }
 }
-
-
 
 
 
