@@ -167,12 +167,12 @@ export default {
       self.createTree(tree_config);
     }
 
-    $('#device_select').change(function (data) {
+    $('#device_select').change(function () {
       var selected_option = $('#device_select option:selected');
       $('#hidden_device_id').removeAttr('selected').val(selected_option.val()).text(selected_option.text().replace(/[-+()]/g, '')).attr('selected', 'selected');
     });
 
-    $('#exampleModal').on('shown.bs.modal', function (e) {
+    $('#exampleModal').on('shown.bs.modal', function () {
       $('#isDeviceExist').attr('disabled', 'disabled');
       var found = false;
       JSON.stringify(tree_config, (k, v) => {

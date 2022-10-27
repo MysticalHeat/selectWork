@@ -8,6 +8,8 @@ class SelectDatabase:
 
     def __init__(self):
         connection = None
+        self.table_name = 'table_cef'
+        self.processed_table_name = 'table_cef_processed'
         try:
             connection = self.connect()
             cursor = connection.cursor()
@@ -73,7 +75,7 @@ class SelectDatabase:
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            query = "INSERT INTO public.table_cef_processed (processed_id, severity) VALUES (%s, %s);"
+            query = f"INSERT INTO public.{self.processed_table_name} (processed_id, severity, device_id) VALUES (%s, %s, %s);"
             cursor.execute(query, data)
             connection.commit()
             print('Результат записан')
@@ -93,7 +95,7 @@ class SelectDatabase:
         info = []
         orderrec = ''
         reversedTuple = False
-        info_table = ''
+        info_table = self.table_name
 
         if lastrec is None:
             lastrec = 1000
@@ -106,7 +108,7 @@ class SelectDatabase:
             lastrec = 'ALL'
 
         if select_proc is not None:
-            info_table = '_processed'
+            info_table = self.processed_table_name
         else:
             for i in range(len(raw_info)):
                 k = raw_info[i]
@@ -123,7 +125,7 @@ class SelectDatabase:
                 info_str = ' WHERE ' + ' and '.join(info)
             else:
                 info_str = ''
-            select_info = f'SELECT * FROM public.table_cef{info_table}{info_str} {orderrec} LIMIT {lastrec}'
+            select_info = f'SELECT * FROM public.{info_table}{info_str} {orderrec} LIMIT {lastrec}'
             cursor.execute(select_info)
             result = cursor.fetchall()
             connection.commit()
@@ -143,7 +145,7 @@ class SelectDatabase:
         """ Получение количества строк из БД """
         connection = None
         info_str = None
-        info_table = None
+        info_table = self.table_name
 
         if severity is not None:
             info_str = f' WHERE severity={severity}'
@@ -151,15 +153,13 @@ class SelectDatabase:
             info_str = ''
 
         if processed is not None:
-            info_table = '_processed'
-        else:
-            info_table = ''
+            info_table = self.processed_table_name
 
 
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            select_info = f'SELECT COUNT(*) FROM public.table_cef{info_table}{info_str}'
+            select_info = f'SELECT COUNT(*) FROM public.{info_table}{info_str}'
             cursor.execute(select_info)
             result = cursor.fetchone()
             connection.commit()

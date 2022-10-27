@@ -40,7 +40,8 @@ def to_proc_dict(data):
     return {
         'id': data[0],
         'processed_id': data[1],
-        'severity': data[2]
+        'severity': data[2],
+        'device_id': data[3]
     }
 
 
@@ -65,7 +66,8 @@ def index():
     if request.method == "POST" and 'processed_id' in request.form:
         processed_id = request.form['processed_id']
         severity = request.form['severity']
-        db.insert_processed_data([processed_id, severity])
+        device_id = request.form['device_id']
+        db.insert_processed_data([processed_id, severity, device_id])
         return jsonify({'result': 'ok'})
 
     if request.method == "POST" and 'count_severity' and 'processed' in request.form:
@@ -184,6 +186,19 @@ def upload():
             ))
         db.insert_info(dataArr)
         return jsonify({'data': 'Its okey'})
+
+
+@app.route('/count', methods=['POST', 'GET'])
+def count():
+    if request.method == "POST":
+        return jsonify({'data': db.get_count()})
+
+
+@app.route('/change_table', methods=['POST', 'GET'])
+def change_table():
+    if request.method == "POST":
+        db.table_name = request.form['table_name']
+        return jsonify({'response': 'its okay'})
 
 
 if __name__ == "__main__":

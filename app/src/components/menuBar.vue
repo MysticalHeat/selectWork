@@ -1,6 +1,11 @@
 <template>
   <div class="col-3 menu">
-    <div class=""></div>
+    <div class="row table_name">
+      <div class="input-group">
+        <input id="change_input" type="text" class="form-control" v-model="table_name" disabled>
+        <button id="change_btn" class="btn btn-primary" style="float: right" @click="change_table">Сменить</button>
+      </div>
+    </div>
   </div>
   <div class="col-9 status">
     <div>
@@ -36,10 +41,33 @@
 <script>
 export default {
   name: "menuBar",
+  data() {
+    return {
+      table_name: 'table_cef',
+      host: window.location.hostname + ':5000'
+    }
+  },
   props: {
     status: {
       type: Object,
       required: true
+    }
+  },
+  methods: {
+    change_table() {
+      var change_table = $('#change_input');
+      if (change_table.is(':disabled')) {
+        change_table.removeAttr('disabled')
+      } else {
+        change_table.attr('disabled', true);
+        $.ajax({
+          type: 'POST',
+          url: 'http://' + this.host + '/change_table',
+          data: {table_name: this.table_name},
+          success: (response) => {
+          }
+        });
+      }
     }
   }
 }
@@ -51,7 +79,7 @@ export default {
   display: table;
   height: 100px;
   margin: 0;
-  padding: 0;
+  padding: 5px;
   border-right: 2px solid #0b5ed7
 }
 
@@ -84,4 +112,9 @@ export default {
   margin-top: 10px;
   font-size: 13px;
 }
+
+.table_name {
+  padding: 5px;
+}
+
 </style>
