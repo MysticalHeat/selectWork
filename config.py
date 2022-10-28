@@ -1,4 +1,4 @@
-DB_HOST = "192.168.1.164"
+DB_HOST = "192.168.180.44"
 DB_DATABASE = "postgres"
 DB_USER = "postgres"
 DB_PORT = "5432"
