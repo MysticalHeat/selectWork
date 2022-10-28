@@ -17,11 +17,34 @@
         </div>
       </div>
       <div class="col-6">
-        <div class="form-group">
-          <label for="msgArea">Сообщение</label>
-          <textarea class="form-control" id="msgArea" rows="7" cols="10" readonly style="resize:none"></textarea>
-          <button type="button" id="status_data_submit" class="btn btn-primary" style="float:right; margin-top: 5px" disabled>Пометить как обработанное</button>
-        </div>
+        <form v-bind:action="'http://' + host" id="select_form" @submit.prevent="send_load">
+          <div class="row">
+            <h1>Имитатор событий</h1>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <select class="form-select" id="device_severity">
+                <option selected disabled>Важность</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="col-8">
+              <select class="form-select" id="device_select">
+                <option selected disabled>Оборудование</option>
+                <option v-for="item in tree_option" :key="item[3]" :value="item[0]" :disabled="item[2]"
+                        :style="item[2] ? {'color': 'red'}: false">{{ item[1] }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <br>
+          <div class="row" id="select_button">
+            <button type="submit" class="btn btn-info">Отправить</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -49,6 +72,8 @@ export default {
   data() {
     return {
       host: 'http://' + window.location.hostname + ':5000',
+      tree_option: [],
+      counter: 0
     }
   },
   props: {
@@ -67,29 +92,32 @@ export default {
         if (obj.children.length === 0) {
           $(this).append($('<div>', {
             id: 'device_' + i,
-            class: 'circles',
-            style: 'margin-left: 150px'
+            class: 'circles'
           }));
-          $(this).append($('<div>', {
-            id: 'device_red_' + i,
-            class: 'circles send',
-            style: 'margin-left: 200px; background-color: red'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_orange_' + i,
-            class: 'circles send',
-            style: 'margin-left: 220px; background-color: orange'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_yellow_' + i,
-            class: 'circles send',
-            style: 'margin-left: 240px; background-color: yellow'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_green_' + i,
-            class: 'circles send',
-            style: 'margin-left: 260px; background-color: limegreen'
-          }));
+          $(this).children('.circles').css({'margin-left': '150px'});
+        }
+      });
+
+      var count = '';
+      this.tree_filtering(data, count);
+      this.counter = 0;
+
+      if (!$('#hidden_device_id').length) {
+        $('#device_select').append('<option hidden id="hidden_device_id" value="hidden">Hidden</option>');
+      }
+    },
+    tree_filtering(tree_recur, count, isRecursed = false, parent = null) {
+      tree_recur.forEach((value) => {
+        if (value.children.length === 0) {
+          this.tree_option.push([this.counter + ' _' + parent + ' _' + value.name, isRecursed ? '-' + count + value.name : count + value.name, false, this.counter]);
+          this.counter += 1;
+        }
+
+        if (value.children.length > 0) {
+          isRecursed ? count += '-' : false;
+          this.tree_option.push([this.counter, '-' + count + value.name, true, this.counter]);
+          this.counter += 1;
+          this.tree_filtering(value.children, count + '-', true, value.name);
         }
       });
     },
@@ -105,11 +133,11 @@ export default {
       downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
       downloadLink.click();
     },
-    send_load(device_id, severity, s_ra, s_rd, device_name) {
+    send_load() {
       axios
         .post(this.host + '/send_imitator', {
-          device_severity: severity,
-          device_select: device_id + ' _' + s_ra + ' _' + s_rd + ' _' + device_name
+          device_severity: $('#device_severity').val(),
+          device_select: $('#device_select').val()
         })
         .then((response) => console.log(response))
     }
@@ -139,20 +167,9 @@ export default {
       self.createTree(tree_config);
     }
 
-    $('.send').click(function () {
-      var [_, sever_color, device_id] = $(this).attr('id').split('_');
-      var parent = $(this).parents().eq(3).children()[0];
-      var obj = $.parseJSON($(parent).attr('data-item'));
-      var device_name = $.parseJSON($(this).parent().attr('data-item')).name;
-      self.send_load(device_id, sever_color, obj.s_ra, obj.s_rd, device_name);
-    });
-
-    $('#msgArea').change(function() {
-      if ($(this).val() === '') {
-        $('#status_data_submit').attr('disabled', true)
-      } else {
-        $('#status_data_submit').attr('disabled', false)
-      }
+    $('#device_select').change(function () {
+      var selected_option = $('#device_select option:selected');
+      $('#hidden_device_id').removeAttr('selected').val(selected_option.val()).text(selected_option.text().replace(/[-+()]/g, '')).attr('selected', 'selected');
     });
 
     $('#exampleModal').on('shown.bs.modal', function () {
@@ -160,7 +177,7 @@ export default {
       var found = false;
       JSON.stringify(tree_config, (k, v) => {
         if (!found) {
-          if (v.name && v.children.length > 0 && v.s_ra === self.procData.s_ra && v.s_rd === self.procData.s_rd) {
+          if (v.name && v.children.length > 0 && v.name === self.procData.parent) {
             if (v.children.find(o => o.name === self.procData.name)) found = true;
           } else return v;
         }
@@ -174,7 +191,7 @@ export default {
       var found = false;
       JSON.stringify(tree_config, (k, v) => {
         if (!found) {
-          if (v.name && v.children.length > 0 && v.s_ra === self.procData.s_ra && v.s_rd === self.procData.s_rd) {
+          if (v.name && v.children.length > 0 && v.name === self.procData.parent) {
             v.children.push({
               name: self.procData.name,
               children: []
@@ -201,6 +218,5 @@ export default {
   padding-left: 12px;
   padding-right: 12px;
 }
-
 
 </style>
