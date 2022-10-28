@@ -81,6 +81,46 @@ export function sendLoad(curHost) {
   });
 }
 
+function showTreant(simpleConf) {
+  simple_chart_config.nodeStructure = simpleConf
+  myTreant.destroy();
+  myTreant = new Treant(simple_chart_config, null, $);
+}
+
+
+function setStatus(number, status, config) {
+  var id;
+  var startRecurs = false;
+  var emptyVar = false;
+  if (typeof number === 'string') {
+    if (number === '') {
+      emptyVar = true;
+    }
+    id = number.split('.')
+    startRecurs = true;
+  } else {
+    id = number
+  }
+  var count = id.length;
+  var num = id.shift();
+  if (count !== 0 && emptyVar === false) {
+    var newConfig = setStatus(id, status, config.children[Number(num) - 1])
+  }
+  if (count === 0 || emptyVar === true) {
+    config.image = '/static/images/' + status + '.png';
+    if (emptyVar === false) {
+      return config
+    }
+  }
+  if (startRecurs === true) {
+    showTreant(config)
+    return
+  }
+  config.children[Number(num) - 1] = newConfig;
+  return config
+
+}
+
 export function sendAjaxForm(form_ajax, curHost, myChart, table) {
   var form = $("#" + form_ajax);
   var arrForm = form.serializeArray();

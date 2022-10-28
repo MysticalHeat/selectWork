@@ -109,7 +109,7 @@ import * as eventRdy from './events'
 import axios from "axios";
 
 var originalSetItem = localStorage.setItem;
-localStorage.setItem = function (key, value) {
+localStorage.setItem = function(key, value) {
   const event = new Event('itemInserted');
 
   event.value = value;
@@ -119,7 +119,6 @@ localStorage.setItem = function (key, value) {
 
   originalSetItem.apply(this, arguments);
 }
-
 
 var data = {
   labels: [],
@@ -205,16 +204,12 @@ export default {
         }
       });
       this.$emit('updateStatus', status);
-      var chkbx = document.getElementById('autoUpdate');
       $.ajax({
         type: 'POST',
         url: 'http://' + this.curHost + '/count',
         success: response => {
           if (parseInt(localStorage.db_count) !== response.data) {
             localStorage.setItem('db_count', response.data);
-            if (chkbx.checked) {
-              this.sendAjax();
-            }
           }
         }
       });
@@ -364,46 +359,46 @@ export default {
     $('#time0').datetimepicker();
     $('#time1').datetimepicker();
 
-    const localStorageSetHandler = function (e) {
+    const localStorageSetHandler = function(e) {
       $.ajax({
-        type: 'POST',
-        url: 'http://' + self.curHost + '/',
-        data: {time0: '', time1: '', message: '', lasttime: 6},
-        success: (response) => {
-          var table_response = response.data;
-          table_response.reverse().forEach((value) => {
-            var device_info = value.extension.match(/device_id=(.*)\sdevice_parent=(.*)\sdevice_name=(.*)\sw/);
-            var device_id = parseInt(device_info[1]);
-            var device_severity = value.severity;
-            var data_id = value.id;
-            var circle_id = 'device_' + device_id;
-            if (!processed_data.find(o => o.processed_id === data_id)) {
-              switch (device_severity) {
-                case 1: {
-                  $('#' + circle_id).css({'background-color': 'red'});
-                  break
-                }
-                case 2: {
-                  $('#' + circle_id).css({'background-color': 'orange'});
-                  break
-                }
-                case 3: {
-                  $('#' + circle_id).css({'background-color': 'yellow'});
-                  break
-                }
-                case 4: {
-                  $('#' + circle_id).css({'background-color': 'limegreen'});
-                  break
-                }
-
+      type: 'POST',
+      url: 'http://' + self.curHost + '/',
+      data: {time0: '', time1: '', message: '', lasttime: 6},
+      success: (response) => {
+        var table_response = response.data;
+        table_response.reverse().forEach((value) => {
+          var device_info = value.extension.match(/device_id=(.*)\sdevice_parent=(.*)\sdevice_name=(.*)\sw/);
+          var device_id = parseInt(device_info[1]);
+          var device_severity = value.severity;
+          var data_id = value.id;
+          var circle_id = 'device_' + device_id;
+          if (!processed_data.find(o => o.processed_id === data_id)) {
+            switch (device_severity) {
+              case 1: {
+                $('#' + circle_id).css({'background-color': 'red'});
+                break
               }
+              case 2: {
+                $('#' + circle_id).css({'background-color': 'orange'});
+                break
+              }
+              case 3: {
+                $('#' + circle_id).css({'background-color': 'yellow'});
+                break
+              }
+              case 4: {
+                $('#' + circle_id).css({'background-color': 'limegreen'});
+                break
+              }
+
             }
-          });
-        },
-        error: function error(_error) {
-          console.log(_error);
-        }
-      });
+          }
+        });
+      },
+      error: function error(_error) {
+        console.log(_error);
+      }
+    });
     }
 
     localStorageSetHandler();
@@ -413,7 +408,7 @@ export default {
     $('#autoUpdate').change(function () {
       var chkbx = document.getElementById('autoUpdate');
       if (chkbx.checked) {
-        timer = setInterval(self.auto_update_table, 500);
+        timer = setInterval(eventRdy.sendAjaxForm, 5000, 'form1', self.curHost, myChart, table);
       } else {
         clearInterval(timer);
       }

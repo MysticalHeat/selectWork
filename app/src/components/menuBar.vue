@@ -43,7 +43,7 @@ export default {
   name: "menuBar",
   data() {
     return {
-      table_name: localStorage.table_name ? localStorage.table_name: 'table_cef',
+      table_name: 'table_cef',
       host: window.location.hostname + ':5000'
     }
   },
@@ -59,7 +59,6 @@ export default {
       if (change_table.is(':disabled')) {
         change_table.removeAttr('disabled')
       } else {
-        localStorage.setItem('table_name', this.table_name);
         change_table.attr('disabled', true);
         $.ajax({
           type: 'POST',
