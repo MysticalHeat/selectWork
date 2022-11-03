@@ -148,6 +148,12 @@ export default {
       tree_config = $.parseJSON(localStorage.tree_config)
     }
 
+    JSON.stringify(tree_config, (k, v) => {
+      if (v.name && v.children.length > 0) {
+      } else return v;
+
+    });
+
     this.createTree(tree_config);
 
     var self = this;
@@ -166,11 +172,6 @@ export default {
       self.tree_option = [];
       self.createTree(tree_config);
     }
-
-    $('#device_select').change(function () {
-      var selected_option = $('#device_select option:selected');
-      $('#hidden_device_id').removeAttr('selected').val(selected_option.val()).text(selected_option.text().replace(/[-+()]/g, '')).attr('selected', 'selected');
-    });
 
     $('#exampleModal').on('shown.bs.modal', function () {
       $('#isDeviceExist').attr('disabled', 'disabled');
