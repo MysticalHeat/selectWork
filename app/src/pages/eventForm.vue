@@ -106,7 +106,6 @@
 
 <script>
 import * as eventRdy from './events'
-import axios from "axios";
 
 var originalSetItem = localStorage.setItem;
 localStorage.setItem = function (key, value) {

@@ -16,6 +16,13 @@
           <a id="download_config" style="display: none"></a>
         </div>
       </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label for="msgArea">Сообщение</label>
+          <textarea class="form-control" id="msgArea" rows="7" cols="10" readonly style="resize:none"></textarea>
+          <button type="button" id="status_data_submit" class="btn btn-primary" style="float:right; margin-top: 5px" disabled>Пометить как обработанное</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -42,8 +49,6 @@ export default {
   data() {
     return {
       host: 'http://' + window.location.hostname + ':5000',
-      tree_option: [],
-      counter: 0
     }
   },
   props: {
@@ -62,9 +67,9 @@ export default {
         if (obj.children.length === 0) {
           $(this).append($('<div>', {
             id: 'device_' + i,
-            class: 'circles'
+            class: 'circles',
+            style: 'margin-left: 150px'
           }));
-          $(this).children('.circles').css({'margin-left': '150px'});
         }
       });
     },
@@ -87,12 +92,6 @@ export default {
       tree_config = $.parseJSON(localStorage.tree_config)
     }
 
-    JSON.stringify(tree_config, (k, v) => {
-      if (v.name && v.children.length > 0) {
-      } else return v;
-
-    });
-
     this.createTree(tree_config);
 
     var self = this;
@@ -112,12 +111,20 @@ export default {
       self.createTree(tree_config);
     }
 
+    $('#msgArea').change(function() {
+      if ($(this).val() === '') {
+        $('#status_data_submit').attr('disabled', true)
+      } else {
+        $('#status_data_submit').attr('disabled', false)
+      }
+    });
+
     $('#exampleModal').on('shown.bs.modal', function () {
       $('#isDeviceExist').attr('disabled', 'disabled');
       var found = false;
       JSON.stringify(tree_config, (k, v) => {
         if (!found) {
-          if (v.name && v.children.length > 0 && v.name === self.procData.parent) {
+          if (v.name && v.children.length > 0 && v.s_ra === parseInt(self.procData.s_ra) && v.s_rd === parseInt(self.procData.s_rd)) {
             if (v.children.find(o => o.name === self.procData.name)) found = true;
           } else return v;
         }
@@ -131,7 +138,7 @@ export default {
       var found = false;
       JSON.stringify(tree_config, (k, v) => {
         if (!found) {
-          if (v.name && v.children.length > 0 && v.name === self.procData.parent) {
+          if (v.name && v.children.length > 0 && v.s_ra === parseInt(self.procData.s_ra) && v.s_rd === parseInt(self.procData.s_rd)) {
             v.children.push({
               name: self.procData.name,
               children: []
@@ -153,5 +160,11 @@ export default {
 #tree {
   zoom: 1.5;
 }
+
+#select_button {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
 
 </style>
