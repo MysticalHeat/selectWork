@@ -109,7 +109,7 @@ import * as eventRdy from './events'
 import axios from "axios";
 
 var originalSetItem = localStorage.setItem;
-localStorage.setItem = function(key, value) {
+localStorage.setItem = function (key, value) {
   const event = new Event('itemInserted');
 
   event.value = value;
@@ -147,13 +147,26 @@ export default {
   data() {
     return {
       host: window.location.hostname,
-      curHost: window.location.hostname + ':5000'
+      curHost: window.location.hostname + ':5000',
+      processed_data_local: {
+                id: null,
+                sev: null,
+                device_id: null,
+                s_ra: null,
+                s_rd: null,
+                name: null
+      }
     }
   },
   props: {
     procData: {
       type: Object,
       default: false
+    }
+  },
+  watch: {
+    procData: function(newVal) {
+      this.processed_data_local = newVal;
     }
   },
   methods: {
@@ -309,44 +322,49 @@ export default {
 
     setInterval(this.axi_status, 500);
 
-    $('#procDataSubmit').click(function () {
-      if (!processed_data.find(o => o.processed_id === table.row(thisRow).data()['id'])) {
+    $('#procDataSubmit, #status_data_submit').click(function () {
+      var comp_id = null;
+      if (thisRow) {
+       comp_id = table.row(thisRow).data()['id']
+      }
+      if (!processed_data.find(o => o.processed_id === comp_id) || $('#msgArea').val() !== '') {
         $.ajax({
           type: 'POST',
           url: 'http://' + self.curHost + '/',
           async: false,
           data: {
-            processed_id: self.procData.id,
-            severity: self.procData.sev,
-            device_id: parseInt(self.procData.device_id)
+            processed_id: self.processed_data_local.id,
+            severity: self.processed_data_local.sev,
+            device_id: parseInt(self.processed_data_local.device_id)
           },
           success: function success(response) {
-            switch (self.procData.sev) {
+            switch (self.processed_data_local.sev) {
               case 1: {
-                $('#device_' + self.procData.device_id).css({'background-color': 'limegreen'});
+                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
                 status.high -= 1;
                 break;
               }
               case 2: {
-                $('#device_' + self.procData.device_id).css({'background-color': 'limegreen'});
+                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
                 status.mid -= 1;
                 break;
               }
               case 3: {
-                $('#device_' + self.procData.device_id).css({'background-color': 'limegreen'});
+                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
                 status.low -= 1;
                 break;
               }
               case 4: {
-                $('#device_' + self.procData.device_id).css({'background-color': 'limegreen'});
+                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
                 status.very_low -= 1;
                 break;
               }
             }
           }
         });
+        $('#msgArea').val('').trigger('change');
         $(thisRow).addClass('read');
-        processed_data.push({processed_id: self.procData.id, device_id: self.procData.device_id});
+        processed_data.push({processed_id: self.processed_data_local.id, device_id: self.processed_data_local.device_id});
       }
       $('#exampleModal').modal('hide');
     })
@@ -359,46 +377,83 @@ export default {
     $('#time0').datetimepicker();
     $('#time1').datetimepicker();
 
-    const localStorageSetHandler = function(e) {
+    $('.tree-leaf-text').click(function () {
+      var selected_id = $(this).parent().children('.circles').first().attr('id').split('_')[1];
+      var isMsgExist = false;
       $.ajax({
-      type: 'POST',
-      url: 'http://' + self.curHost + '/',
-      data: {time0: '', time1: '', message: '', lasttime: 6},
-      success: (response) => {
-        var table_response = response.data;
-        table_response.reverse().forEach((value) => {
-          var device_info = value.extension.match(/device_id=(.*)\sdevice_parent=(.*)\sdevice_name=(.*)\sw/);
-          var device_id = parseInt(device_info[1]);
-          var device_severity = value.severity;
-          var data_id = value.id;
-          var circle_id = 'device_' + device_id;
-          if (!processed_data.find(o => o.processed_id === data_id)) {
-            switch (device_severity) {
-              case 1: {
-                $('#' + circle_id).css({'background-color': 'red'});
-                break
+        type: 'POST',
+        url: 'http://' + self.curHost + '/',
+        data: {time0: '', time1: '', message: '', lasttime: 6},
+        success: (response) => {
+          var table_response = response.data;
+          table_response.reverse().every((value) => {
+            var device_info = value.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
+            if (!device_info) return true;
+            var device_id = parseInt(device_info[1]);
+            if (parseInt(selected_id) === device_id && !processed_data.find(o => o.processed_id === value.id)) {
+              self.processed_data_local = {
+                id: value.id,
+                sev: value.severity,
+                device_id: device_id,
+                s_ra: device_info[2],
+                s_rd: device_info[3],
+                name: device_info[4]
               }
-              case 2: {
-                $('#' + circle_id).css({'background-color': 'orange'});
-                break
-              }
-              case 3: {
-                $('#' + circle_id).css({'background-color': 'yellow'});
-                break
-              }
-              case 4: {
-                $('#' + circle_id).css({'background-color': 'limegreen'});
-                break
-              }
-
-            }
+              isMsgExist = true;
+              $('#msgArea').val(value.original_message).trigger('change');
+              return false
+            } else return true;
+          });
+          if (!isMsgExist) {
+            $('#msgArea').val('').trigger('change');
           }
-        });
-      },
-      error: function error(_error) {
-        console.log(_error);
-      }
+        },
+        error: function error(_error) {
+          console.log(_error);
+        }
+      });
     });
+
+    const localStorageSetHandler = function (e) {
+      $.ajax({
+        type: 'POST',
+        url: 'http://' + self.curHost + '/',
+        data: {time0: '', time1: '', message: '', lasttime: 6},
+        success: (response) => {
+          var table_response = response.data;
+          table_response.reverse().forEach((value) => {
+            var device_info = value.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)\s/);
+            if (!device_info) return;
+            var device_id = parseInt(device_info[1]);
+            var device_severity = value.severity;
+            var data_id = value.id;
+            var circle_id = 'device_' + device_id;
+            if (!processed_data.find(o => o.processed_id === data_id)) {
+              switch (device_severity) {
+                case 1: {
+                  $('#' + circle_id).css({'background-color': 'red'});
+                  break
+                }
+                case 2: {
+                  $('#' + circle_id).css({'background-color': 'orange'});
+                  break
+                }
+                case 3: {
+                  $('#' + circle_id).css({'background-color': 'yellow'});
+                  break
+                }
+                case 4: {
+                  $('#' + circle_id).css({'background-color': 'limegreen'});
+                  break
+                }
+              }
+            }
+          });
+        },
+        error: function error(_error) {
+          console.log(_error);
+        }
+      });
     }
 
     localStorageSetHandler();

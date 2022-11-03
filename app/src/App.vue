@@ -7,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
       </div>
       <div class="modal-body">
-        ID = {{ this.procData.id }} Важность = {{ this.procData.sev }} Владелец = {{ this.procData.parent }} Название = {{ this.procData.name }}
+        ID = {{ this.procData.id }} Важность = {{ this.procData.sev }} Название = {{ this.procData.name }}
       </div>
       <div class="modal-footer">
         <button type="button" id="isDeviceExist" class="btn btn-primary" disabled>Добавить</button>
@@ -65,7 +65,8 @@ export default {
         id: null,
         sev: null,
         device_id: null,
-        parent: null,
+        s_ra: null,
+        s_rd: null,
         name: null
       }
     }
@@ -79,10 +80,11 @@ export default {
     setProcData(data) {
       this.procData.id = data.id;
       this.procData.sev = data.severity;
-      var test = data.extension.match(/device_id=(.*)\sdevice_parent=(.*)\sdevice_name=(.*)\sw/);
+      var test = data.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
       this.procData.device_id = test[1];
-      this.procData.parent = test[2];
-      this.procData.name = test[3];
+      this.procData.s_ra = test[2];
+      this.procData.s_rd = test[3];
+      this.procData.name = test[4];
     }
   }
 }
@@ -148,6 +150,11 @@ export default {
   -webkit-border-radius: 50px;
   border-radius: 50px;
   position: absolute;
+}
+
+.send:hover {
+  cursor:pointer;
+  box-shadow: 0 0 5px;
 }
 
 

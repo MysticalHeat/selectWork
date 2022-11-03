@@ -132,8 +132,15 @@ def download():
 @app.route('/send_imitator', methods=['POST', 'GET'])
 def send_imitator():
     if request.method == "POST":
-        reqSeverity = request.json['device_severity']
-        reqDeviceId, reqDeviceParent, reqDeviceName = request.json['device_select'].split(' _')
+        severity_variables = {
+            'red': 1,
+            'orange': 2,
+            'yellow': 3,
+            'green': 4
+        }
+        if request.json['device_severity'] in severity_variables:
+            reqSeverity = severity_variables[request.json['device_severity']]
+        reqDeviceId, reqDeviceSRA, reqDeviceSRD, reqDeviceName = request.json['device_select'].split(' _')
         dataArr = [(
             datetime.now(),
             datetime.now(),
@@ -145,13 +152,25 @@ def send_imitator():
             '1:2101411:13',
             'GPL SNMP public access udp',
             reqSeverity,
-            'rt=Feb 02 2022 19:22:46.732615 +0300 cn1=-1347478879 cn1Label=alert src=10.145.9.125 spt=61292 '
-            'dst=172.21.172.233 dpt=161 proto=UDP device_id={0} device_parent={1} device_name={2} wr_t=Aug 16 2022 '
-            '18:58:52.2900 copied=1'.format(reqDeviceId, reqDeviceParent, reqDeviceName),
-            'Feb 02 2022 19:22:46 IDS CEF:0|OOO SFERA|IDSnet|1.0|1:2101411:13|GPL SNMP public access udp|2|rt=Feb 02 '
+            'rt=' + datetime.now().strftime('%b %d %Y %H:%M:%S.%f') +
+            '+0300 cn1=-1347478879 cn1Label=alert '
+            'src=10.145.9.125 spt=61292 '
+            'dst=172.21.172.233 dpt=161 proto=UDP device_id={0} s_ra={1} s_rd={2} device_name={3}'.format(
+                reqDeviceId,
+                reqDeviceSRA,
+                reqDeviceSRD,
+                reqDeviceName
+            ),
+            datetime.now().strftime('%b %d %Y %H:%M:%S') +
+            'IDS CEF:0|OOO SFERA|IDSnet|1.0|1:2101411:13|GPL SNMP '
+            'public access udp|2|rt=Feb 02 '
             '2022 19:22:46.732615 +0300 cn1=-1347478879 cn1Label=alert src=10.145.9.125 spt=61292 dst=172.21.172.233 '
-            'dpt=161 proto=UDP device_id={0} device_parent={1} device_name={2}'
-            ' wr_t=Aug 16 2022 18:58:52.2900 copied=1'.format(reqDeviceId, reqDeviceParent, reqDeviceName)
+            'dpt=161 proto=UDP device_id={0} device_parent={1} s_ra={1} s_rd={2} device_name={3}'.format(
+                reqDeviceId,
+                reqDeviceSRA,
+                reqDeviceSRD,
+                reqDeviceName
+            )
         )]
         db.insert_info(dataArr)
         return jsonify({'data': 'its okay'})
