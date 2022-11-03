@@ -16,36 +16,6 @@
           <a id="download_config" style="display: none"></a>
         </div>
       </div>
-      <div class="col-6">
-        <form v-bind:action="'http://' + host" id="select_form" @submit.prevent="send_load">
-          <div class="row">
-            <h1>Имитатор событий</h1>
-          </div>
-          <div class="row">
-            <div class="col-4">
-              <select class="form-select" id="device_severity">
-                <option selected disabled>Важность</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-            </div>
-            <div class="col-8">
-              <select class="form-select" id="device_select">
-                <option selected disabled>Оборудование</option>
-                <option v-for="item in tree_option" :key="item[3]" :value="item[0]" :disabled="item[2]"
-                        :style="item[2] ? {'color': 'red'}: false">{{ item[1] }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <br>
-          <div class="row" id="select_button">
-            <button type="submit" class="btn btn-info">Отправить</button>
-          </div>
-        </form>
-      </div>
     </div>
   </div>
 </template>
@@ -97,29 +67,6 @@ export default {
           $(this).children('.circles').css({'margin-left': '150px'});
         }
       });
-
-      var count = '';
-      this.tree_filtering(data, count);
-      this.counter = 0;
-
-      if (!$('#hidden_device_id').length) {
-        $('#device_select').append('<option hidden id="hidden_device_id" value="hidden">Hidden</option>');
-      }
-    },
-    tree_filtering(tree_recur, count, isRecursed = false, parent = null) {
-      tree_recur.forEach((value) => {
-        if (value.children.length === 0) {
-          this.tree_option.push([this.counter + ' _' + parent + ' _' + value.name, isRecursed ? '-' + count + value.name : count + value.name, false, this.counter]);
-          this.counter += 1;
-        }
-
-        if (value.children.length > 0) {
-          isRecursed ? count += '-' : false;
-          this.tree_option.push([this.counter, '-' + count + value.name, true, this.counter]);
-          this.counter += 1;
-          this.tree_filtering(value.children, count + '-', true, value.name);
-        }
-      });
     },
     download() {
       var textToWrite = JSON.stringify(tree_config, null, 3);
@@ -132,14 +79,6 @@ export default {
       downloadLink.innerHTML = "Download File";
       downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
       downloadLink.click();
-    },
-    send_load() {
-      axios
-        .post(this.host + '/send_imitator', {
-          device_severity: $('#device_severity').val(),
-          device_select: $('#device_select').val()
-        })
-        .then((response) => console.log(response))
     }
   },
   mounted() {
@@ -213,11 +152,6 @@ export default {
 
 #tree {
   zoom: 1.5;
-}
-
-#select_button {
-  padding-left: 12px;
-  padding-right: 12px;
 }
 
 </style>
