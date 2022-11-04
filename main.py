@@ -163,9 +163,8 @@ def send_imitator():
             ),
             datetime.now().strftime('%b %d %Y %H:%M:%S') +
             'IDS CEF:0|OOO SFERA|IDSnet|1.0|1:2101411:13|GPL SNMP '
-            'public access udp|2|rt=Feb 02 '
-            '2022 19:22:46.732615 +0300 cn1=-1347478879 cn1Label=alert src=10.145.9.125 spt=61292 dst=172.21.172.233 '
-            'dpt=161 proto=UDP device_id={0} device_parent={1} s_ra={1} s_rd={2} device_name={3}'.format(
+            'public access udp|' + str(reqSeverity) + '| ' +
+            'device_id={0} device_parent={1} s_ra={1} s_rd={2} device_name={3}'.format(
                 reqDeviceId,
                 reqDeviceSRA,
                 reqDeviceSRD,
