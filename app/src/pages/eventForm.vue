@@ -367,6 +367,8 @@ export default {
         processed_data.push({processed_id: self.processed_data_local.id, device_id: self.processed_data_local.device_id});
       }
       $('#exampleModal').modal('hide');
+      thisRow = '';
+      localStorageSetHandler();
     })
 
     $(window).resize(function () {
@@ -386,7 +388,7 @@ export default {
         data: {time0: '', time1: '', message: '', lasttime: 6},
         success: (response) => {
           var table_response = response.data;
-          table_response.reverse().every((value) => {
+          table_response.every((value) => {
             var device_info = value.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
             if (!device_info) return true;
             var device_id = parseInt(device_info[1]);
