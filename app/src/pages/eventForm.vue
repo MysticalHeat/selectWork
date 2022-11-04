@@ -366,6 +366,8 @@ export default {
         processed_data.push({processed_id: self.processed_data_local.id, device_id: self.processed_data_local.device_id});
       }
       $('#exampleModal').modal('hide');
+      thisRow = '';
+      localStorageSetHandler();
     })
 
     $(window).resize(function () {
