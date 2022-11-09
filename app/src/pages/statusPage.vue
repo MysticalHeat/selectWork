@@ -20,7 +20,9 @@
         <div class="form-group">
           <label for="msgArea">Сообщение</label>
           <textarea class="form-control" id="msgArea" rows="7" cols="10" readonly style="resize:none"></textarea>
-          <button type="button" id="status_data_submit" class="btn btn-primary" style="float:right; margin-top: 5px" disabled>Пометить как обработанное</button>
+          <button type="button" id="status_data_submit" class="btn btn-primary" style="float:right; margin-top: 5px"
+                  disabled>Пометить как обработанное
+          </button>
         </div>
       </div>
     </div>
@@ -61,37 +63,45 @@ export default {
     createTree(data) {
       var tree = new TreeView(data, 'tree');
 
-      $('div .tree-leaf-content').each(function (i) {
-        var obj = $.parseJSON($(this).attr('data-item'));
+      var s_ra, s_rd;
+      var count = 0;
+      $('div .tree-leaf-content').each(function () {
+          var obj = $.parseJSON($(this).attr('data-item'));
 
-        if (obj.children.length === 0) {
-          $(this).append($('<div>', {
-            id: 'device_' + i,
-            class: 'circles',
-            style: 'margin-left: 150px'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_red_' + i,
-            class: 'circles send',
-            style: 'margin-left: 200px; background-color: red'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_orange_' + i,
-            class: 'circles send',
-            style: 'margin-left: 220px; background-color: orange'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_yellow_' + i,
-            class: 'circles send',
-            style: 'margin-left: 240px; background-color: yellow'
-          }));
-          $(this).append($('<div>', {
-            id: 'device_green_' + i,
-            class: 'circles send',
-            style: 'margin-left: 260px; background-color: limegreen'
-          }));
+          s_ra = obj.children.length > 0 ? obj.s_ra : s_ra;
+          s_rd = obj.children.length > 0 ? obj.s_rd : s_rd;
+
+          if (obj.children.length === 0) {
+            $(this).append($('<div>', {
+              id: `device_${s_ra}_${s_rd}_${count}`,
+              class: 'circles',
+              style: 'margin-left: 150px'
+            }));
+            $(this).append($('<div>', {
+              id: `device_red_${s_ra}_${s_rd}_${count}`,
+              class: 'circles send',
+              style: 'margin-left: 200px; background-color: red'
+            }));
+            $(this).append($('<div>', {
+              id: `device_orange_${s_ra}_${s_rd}_${count}`,
+              class: 'circles send',
+              style: 'margin-left: 220px; background-color: orange'
+            }));
+            $(this).append($('<div>', {
+              id: `device_yellow_${s_ra}_${s_rd}_${count}`,
+              class: 'circles send',
+              style: 'margin-left: 240px; background-color: yellow'
+            }));
+            $(this).append($('<div>', {
+              id: `device_green_${s_ra}_${s_rd}_${count}`,
+              class: 'circles send',
+              style: 'margin-left: 260px; background-color: limegreen'
+            }));
+            count += 1;
+          } else count = 0;
         }
-      });
+      )
+      ;
     },
     download() {
       var textToWrite = JSON.stringify(tree_config, null, 3);
@@ -133,21 +143,27 @@ export default {
     });
 
     function onReaderLoad(event) {
+      try {
+        tree_config = $.parseJSON(event.target.result);
+      } catch (error) {
+        alert('Неправильный json файл\nСообщение об ошибке:\n' + error.message);
+        return
+      }
       localStorage.tree_config = event.target.result;
-      tree_config = $.parseJSON(event.target.result);
       self.tree_option = [];
       self.createTree(tree_config);
+      document.dispatchEvent(new Event('itemInserted'));
     }
 
     $('.send').click(function () {
-      var [_, sever_color, device_id] = $(this).attr('id').split('_');
+      var [, sever_color,,, device_id] = $(this).attr('id').split('_');
       var parent = $(this).parents().eq(3).children()[0];
       var obj = $.parseJSON($(parent).attr('data-item'));
       var device_name = $.parseJSON($(this).parent().attr('data-item')).name;
       self.send_load(device_id, sever_color, obj.s_ra, obj.s_rd, device_name);
     });
 
-    $('#msgArea').change(function() {
+    $('#msgArea').change(function () {
       if ($(this).val() === '') {
         $('#status_data_submit').attr('disabled', true)
       } else {
@@ -160,7 +176,7 @@ export default {
       var found = false;
       JSON.stringify(tree_config, (k, v) => {
         if (!found) {
-          if (v.name && v.children.length > 0 && v.s_ra === self.procData.s_ra && v.s_rd === self.procData.s_rd) {
+          if (v.name && v.children.length > 0 && v.s_ra === parseInt(self.procData.s_ra) && v.s_rd === parseInt(self.procData.s_rd)) {
             if (v.children.find(o => o.name === self.procData.name)) found = true;
           } else return v;
         }
@@ -174,7 +190,7 @@ export default {
       var found = false;
       JSON.stringify(tree_config, (k, v) => {
         if (!found) {
-          if (v.name && v.children.length > 0 && v.s_ra === self.procData.s_ra && v.s_rd === self.procData.s_rd) {
+          if (v.name && v.children.length > 0 && v.s_ra === parseInt(self.procData.s_ra) && v.s_rd === parseInt(self.procData.s_rd)) {
             v.children.push({
               name: self.procData.name,
               children: []

@@ -56,10 +56,10 @@ export default {
   data() {
     return {
       status: {
-        high: 0,
-        mid: 0,
+        very_low: 0,
         low: 0,
-        very_low: 0
+        mid: 0,
+        high: 0
       },
       procData: {
         id: null,

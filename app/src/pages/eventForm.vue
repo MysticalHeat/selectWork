@@ -149,12 +149,12 @@ export default {
       host: window.location.hostname,
       curHost: window.location.hostname + ':5000',
       processed_data_local: {
-                id: null,
-                sev: null,
-                device_id: null,
-                s_ra: null,
-                s_rd: null,
-                name: null
+        id: null,
+        sev: null,
+        device_id: null,
+        s_ra: null,
+        s_rd: null,
+        name: null
       }
     }
   },
@@ -165,7 +165,7 @@ export default {
     }
   },
   watch: {
-    procData: function(newVal) {
+    procData: function (newVal) {
       this.processed_data_local = newVal;
     }
   },
@@ -325,7 +325,7 @@ export default {
     $('#procDataSubmit, #status_data_submit').click(function () {
       var comp_id = null;
       if (thisRow) {
-       comp_id = table.row(thisRow).data()['id']
+        comp_id = table.row(thisRow).data()['id']
       }
       if (!processed_data.find(o => o.processed_id === comp_id) || $('#msgArea').val() !== '') {
         $.ajax({
@@ -338,25 +338,26 @@ export default {
             device_id: parseInt(self.processed_data_local.device_id)
           },
           success: function success(response) {
+            var device = `#device_${self.processed_data_local.s_ra}_${self.processed_data_local.s_rd}_${self.processed_data_local.device_id}`;
             switch (self.processed_data_local.sev) {
               case 1: {
-                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.high -= 1;
+                $(device).css({'background-color': 'limegreen'});
+                status.very_Low -= 1;
                 break;
               }
               case 2: {
-                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.mid -= 1;
-                break;
-              }
-              case 3: {
-                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
+                $(device).css({'background-color': 'limegreen'});
                 status.low -= 1;
                 break;
               }
+              case 3: {
+                $(device).css({'background-color': 'limegreen'});
+                status.mid -= 1;
+                break;
+              }
               case 4: {
-                $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.very_low -= 1;
+                $(device).css({'background-color': 'limegreen'});
+                status.high -= 1;
                 break;
               }
             }
@@ -364,7 +365,10 @@ export default {
         });
         $('#msgArea').val('').trigger('change');
         $(thisRow).addClass('read');
-        processed_data.push({processed_id: self.processed_data_local.id, device_id: self.processed_data_local.device_id});
+        processed_data.push({
+          processed_id: self.processed_data_local.id,
+          device_id: self.processed_data_local.device_id
+        });
       }
       $('#exampleModal').modal('hide');
       thisRow = '';
@@ -380,7 +384,7 @@ export default {
     $('#time1').datetimepicker();
 
     $('.tree-leaf-text').click(function () {
-      var selected_id = $(this).parent().children('.circles').first().attr('id').split('_')[1];
+      var [, selected_s_ra, selected_s_rd, selected_id] = $(this).parent().children('.circles').first().attr('id').split('_');
       var isMsgExist = false;
       $.ajax({
         type: 'POST',
@@ -389,17 +393,16 @@ export default {
         success: (response) => {
           var table_response = response.data;
           table_response.every((value) => {
-            var device_info = value.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
+            var [device_info, device_id, device_s_ra, device_s_rd, device_name] = value.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
             if (!device_info) return true;
-            var device_id = parseInt(device_info[1]);
-            if (parseInt(selected_id) === device_id && !processed_data.find(o => o.processed_id === value.id)) {
+            if (selected_id === device_id && selected_s_ra === device_s_ra && selected_s_rd === device_s_rd  && !processed_data.find(o => o.processed_id === value.id)) {
               self.processed_data_local = {
                 id: value.id,
                 sev: value.severity,
                 device_id: device_id,
-                s_ra: device_info[2],
-                s_rd: device_info[3],
-                name: device_info[4]
+                s_ra: device_s_ra,
+                s_rd: device_s_rd,
+                name: device_name
               }
               isMsgExist = true;
               $('#msgArea').val(value.original_message).trigger('change');
@@ -429,23 +432,23 @@ export default {
             var device_id = parseInt(device_info[1]);
             var device_severity = value.severity;
             var data_id = value.id;
-            var circle_id = 'device_' + device_id;
+            var circle_id = `device_${device_info[2]}_${device_info[3]}_${device_id}`;
             if (!processed_data.find(o => o.processed_id === data_id)) {
               switch (device_severity) {
                 case 1: {
-                  $('#' + circle_id).css({'background-color': 'red'});
+                  $('#' + circle_id).css({'background-color': 'limegreen'});
                   break
                 }
                 case 2: {
-                  $('#' + circle_id).css({'background-color': 'orange'});
-                  break
-                }
-                case 3: {
                   $('#' + circle_id).css({'background-color': 'yellow'});
                   break
                 }
+                case 3: {
+                  $('#' + circle_id).css({'background-color': 'orange'});
+                  break
+                }
                 case 4: {
-                  $('#' + circle_id).css({'background-color': 'limegreen'});
+                  $('#' + circle_id).css({'background-color': 'red'});
                   break
                 }
               }
