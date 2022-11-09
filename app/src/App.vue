@@ -56,10 +56,10 @@ export default {
   data() {
     return {
       status: {
-        high: 0,
-        mid: 0,
+        very_low: 0,
         low: 0,
-        very_low: 0
+        mid: 0,
+        high: 0
       },
       procData: {
         id: null,
@@ -80,11 +80,11 @@ export default {
     setProcData(data) {
       this.procData.id = data.id;
       this.procData.sev = data.severity;
-      var test = data.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
-      this.procData.device_id = test[1];
-      this.procData.s_ra = test[2];
-      this.procData.s_rd = test[3];
-      this.procData.name = test[4];
+      var device = data.extension.match(/device_id=(.*)\ss_ra=(.*)\ss_rd=(.*)\sdevice_name=(.*)$/);
+      this.procData.device_id = device[1];
+      this.procData.s_ra = device[2];
+      this.procData.s_rd = device[3];
+      this.procData.name = device[4];
     }
   }
 }

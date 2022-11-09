@@ -73,10 +73,10 @@ def index():
     if request.method == "POST" and 'count_severity' and 'processed' in request.form:
         return jsonify({
             'severity': [
-                db.get_count(severity=1) - db.get_count(severity=1, processed=True),
-                db.get_count(severity=2) - db.get_count(severity=2, processed=True),
+                db.get_count(severity=4) - db.get_count(severity=4, processed=True),
                 db.get_count(severity=3) - db.get_count(severity=3, processed=True),
-                db.get_count(severity=4) - db.get_count(severity=4, processed=True)
+                db.get_count(severity=2) - db.get_count(severity=2, processed=True),
+                db.get_count(severity=1) - db.get_count(severity=1, processed=True)
             ]
         })
 
@@ -133,10 +133,10 @@ def download():
 def send_imitator():
     if request.method == "POST":
         severity_variables = {
-            'red': 1,
-            'orange': 2,
-            'yellow': 3,
-            'green': 4
+            'green': 1,
+            'yellow': 2,
+            'orange': 3,
+            'red': 4
         }
         if request.json['device_severity'] in severity_variables:
             reqSeverity = severity_variables[request.json['device_severity']]
@@ -153,7 +153,7 @@ def send_imitator():
             'GPL SNMP public access udp',
             reqSeverity,
             'rt=' + datetime.now().strftime('%b %d %Y %H:%M:%S.%f') +
-            '+0300 cn1=-1347478879 cn1Label=alert '
+            ' +0300 cn1=-1347478879 cn1Label=alert '
             'src=10.145.9.125 spt=61292 '
             'dst=172.21.172.233 dpt=161 proto=UDP device_id={0} s_ra={1} s_rd={2} device_name={3}'.format(
                 reqDeviceId,
@@ -162,7 +162,7 @@ def send_imitator():
                 reqDeviceName
             ),
             datetime.now().strftime('%b %d %Y %H:%M:%S') +
-            'IDS CEF:0|OOO SFERA|IDSnet|1.0|1:2101411:13|GPL SNMP '
+            ' IDS CEF:0|OOO SFERA|IDSnet|1.0|1:2101411:13|GPL SNMP '
             'public access udp|' + str(reqSeverity) + '| ' +
             'device_id={0} device_parent={1} s_ra={1} s_rd={2} device_name={3}'.format(
                 reqDeviceId,

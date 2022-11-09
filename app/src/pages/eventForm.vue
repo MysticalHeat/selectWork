@@ -340,22 +340,22 @@ export default {
             switch (self.processed_data_local.sev) {
               case 1: {
                 $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.high -= 1;
+                status.very_Low -= 1;
                 break;
               }
               case 2: {
                 $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.mid -= 1;
+                status.low -= 1;
                 break;
               }
               case 3: {
                 $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.low -= 1;
+                status.mid -= 1;
                 break;
               }
               case 4: {
                 $('#device_' + self.processed_data_local.device_id).css({'background-color': 'limegreen'});
-                status.very_low -= 1;
+                status.high -= 1;
                 break;
               }
             }
@@ -428,23 +428,23 @@ export default {
             var device_id = parseInt(device_info[1]);
             var device_severity = value.severity;
             var data_id = value.id;
-            var circle_id = 'device_' + device_id;
+            var circle_id = `device_${device_info[2]}_${device_info[3]}_${device_id}`;
             if (!processed_data.find(o => o.processed_id === data_id)) {
               switch (device_severity) {
                 case 1: {
-                  $('#' + circle_id).css({'background-color': 'red'});
+                  $('#' + circle_id).css({'background-color': 'limegreen'});
                   break
                 }
                 case 2: {
-                  $('#' + circle_id).css({'background-color': 'orange'});
-                  break
-                }
-                case 3: {
                   $('#' + circle_id).css({'background-color': 'yellow'});
                   break
                 }
+                case 3: {
+                  $('#' + circle_id).css({'background-color': 'orange'});
+                  break
+                }
                 case 4: {
-                  $('#' + circle_id).css({'background-color': 'limegreen'});
+                  $('#' + circle_id).css({'background-color': 'red'});
                   break
                 }
               }
@@ -456,6 +456,7 @@ export default {
         }
       });
     }
+
 
     localStorageSetHandler();
 

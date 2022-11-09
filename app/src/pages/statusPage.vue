@@ -20,7 +20,9 @@
         <div class="form-group">
           <label for="msgArea">Сообщение</label>
           <textarea class="form-control" id="msgArea" rows="7" cols="10" readonly style="resize:none"></textarea>
-          <button type="button" id="status_data_submit" class="btn btn-primary" style="float:right; margin-top: 5px" disabled>Пометить как обработанное</button>
+          <button type="button" id="status_data_submit" class="btn btn-primary" style="float:right; margin-top: 5px"
+                  disabled>Пометить как обработанное
+          </button>
         </div>
       </div>
     </div>
@@ -60,17 +62,20 @@ export default {
   methods: {
     createTree(data) {
       var tree = new TreeView(data, 'tree');
-
-      $('div .tree-leaf-content').each(function (i) {
+      var s_ra, s_rd;
+      var count = 0;
+      $('div .tree-leaf-content').each(function () {
         var obj = $.parseJSON($(this).attr('data-item'));
-
+        s_ra = obj.children.length > 0 ? obj.s_ra: s_ra;
+        s_rd = obj.children.length > 0 ? obj.s_rd: s_rd;
         if (obj.children.length === 0) {
           $(this).append($('<div>', {
-            id: 'device_' + i,
+            id: `device_${s_ra}_${s_rd}_${count}`,
             class: 'circles',
             style: 'margin-left: 150px'
           }));
-        }
+          count += 1;
+        } else count = 0;
       });
     },
     download() {
@@ -100,18 +105,23 @@ export default {
       var reader = new FileReader();
       reader.onload = onReaderLoad;
       reader.readAsText(data.target.files[0]);
-
       $('#js_import').val('');
     });
 
     function onReaderLoad(event) {
+      try {
+        tree_config = $.parseJSON(event.target.result);
+      } catch (error) {
+        alert('Неправильный json файл\nСообщение об ошибке:\n'+error.message);
+        return
+      }
       localStorage.tree_config = event.target.result;
-      tree_config = $.parseJSON(event.target.result);
       self.tree_option = [];
       self.createTree(tree_config);
+      document.dispatchEvent(new Event('itemInserted'));
     }
 
-    $('#msgArea').change(function() {
+    $('#msgArea').change(function () {
       if ($(this).val() === '') {
         $('#status_data_submit').attr('disabled', true)
       } else {
