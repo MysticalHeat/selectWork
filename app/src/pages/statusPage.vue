@@ -121,6 +121,10 @@ export default {
       document.dispatchEvent(new Event('itemInserted'));
     }
 
+    $(document).on('itemInserted', function() {
+      $('.circles').css({'background-color': 'limegreen'});
+    });
+
     $('#msgArea').change(function () {
       if ($(this).val() === '') {
         $('#status_data_submit').attr('disabled', true)
