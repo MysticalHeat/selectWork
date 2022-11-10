@@ -193,7 +193,6 @@ export default {
       $.ajax({
         type: 'POST',
         url: 'http://' + this.curHost + '/',
-        async: false,
         data: 'select_processed=True',
         success: response => {
           processed_data = response.data
@@ -210,8 +209,16 @@ export default {
         data: 'count_severity=true&processed=true',
         success: data => {
           var counter = 0;
+          if (!localStorage.db_count_severity) {
+            localStorage.setItem('db_count_severity', JSON.stringify(status));
+          }
+          var storage_count = JSON.parse(localStorage.db_count_severity);
           for (var key in status) {
             status[key] = data.severity[counter];
+            if (parseInt(storage_count[key]) !== data.severity[counter]) {
+              localStorage.setItem('db_count_severity', JSON.stringify(status));
+              this.updateProcessedData();
+            }
             counter += 1;
           }
         }

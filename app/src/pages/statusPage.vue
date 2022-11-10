@@ -155,6 +155,10 @@ export default {
       document.dispatchEvent(new Event('itemInserted'));
     }
 
+    $(document).on('itemInserted', function() {
+      $('.circles').not('.send').css({'background-color': 'limegreen'});
+    });
+
     $('.send').click(function () {
       var [, sever_color,,, device_id] = $(this).attr('id').split('_');
       var parent = $(this).parents().eq(3).children()[0];
