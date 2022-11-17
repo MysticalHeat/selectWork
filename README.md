@@ -1,10 +1,8 @@
-# selectWork
-Выборка данных из БД
-Python 3.7
+# SFERA web-app
+Веб-приложение для анализа состояния оборудования внутри локальной сети.
 
-Команда для импорта БД:
-pg_restore -h hostname -U username -F с -d dbname dump.tar.gz
+Версия Python: v3.5
 
-Для импорта, БД уже должна существовать, файл только создает таблички и заполняет данными.
+Стек: Python Flask, HTML, CSS, Bootstrap, JS, Jquery, Vue.js, PostgreSQL.
 
-Также в корневом каталоге репозитория нужно создать файл config.py и добавить переменные DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE.
+Скрипты для установки/запуска: ./install.sh; ./start.sh
