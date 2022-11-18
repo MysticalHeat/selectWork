@@ -93,6 +93,10 @@ class SelectDatabase:
                 if i == 0 and (time[0] and time[1]) is not None:
                     info.append(f"writing_utc BETWEEN '{time[0]}' and '{time[1]}'")
                 if i == 1:
+                    case_sensitive = ''
+                    if '^*' in message:
+                        case_sensitive = 'I'
+                    message = message.replace('^*', '')
                     message_array = message.replace(' ', '').split('&')
                     like_values = []
                     not_like_values = []
@@ -104,12 +108,12 @@ class SelectDatabase:
                     values_joined = "%'), ('%".join(like_values)
                     like_string = "values ('%" + values_joined + "%')"
 
-                    info.append(f"original_message LIKE all({like_string})")
+                    info.append(f"original_message {case_sensitive}LIKE all({like_string})")
 
                     if not_like_values:
                         not_values_joined = "%'), ('%".join(not_like_values)
                         not_like_string = "values ('%" + not_values_joined + "%')"
-                        info.append(f"original_message NOT LIKE all({not_like_string})")
+                        info.append(f"original_message NOT {case_sensitive}LIKE all({not_like_string})")
 
         try:
             connection = self.connect()
