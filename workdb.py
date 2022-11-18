@@ -94,9 +94,9 @@ class SelectDatabase:
                     info.append(f"writing_utc BETWEEN '{time[0]}' and '{time[1]}'")
                 if i == 1:
                     case_sensitive = ''
-                    if '^*' in message:
+                    if '*' in message:
                         case_sensitive = 'I'
-                    message = message.replace('^*', '')
+                    message = message.replace('*', '')
                     message_array = message.replace(' ', '').split('&')
                     like_values = []
                     not_like_values = []
