@@ -1,0 +1,10 @@
+__pycache__
+venv
+config.py
+cert/192.168.1.189.crt
+cert/192.168.1.189.csr
+cert/device.key
+cert/rootCA.key
+cert/rootCA.pem
+cert/rootCA.srl
+.idea/

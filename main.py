@@ -1,12 +1,27 @@
 import workdb
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, flash
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+import data
 from datetime import datetime, timedelta
 import json
 import re
+import os
 
 app = Flask(__name__)
 db = workdb.SelectDatabase()
 
+app.secret_key = b'2c061365ae364cc71c178fa6d423fbd71d80c45073870f76d2c6b000bb91d016'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(login):
+    try:
+        return data.USERS.get(login)
+    except:
+        return None
 
 def do_none(req):
     if not req:
@@ -46,7 +61,38 @@ def last_time(lasttime):
         return datetime.now() - timedelta(days=30)
 
 
+def read_cert():
+    current_directory = os.path.split(os.path.abspath(__file__))[0]
+    cert_dir = os.listdir(current_directory + '/cert')
+    return [item for item in cert_dir if '.crt' in item][0]
+
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+    if request.method == "POST":
+       if request.form["login"]:
+           login = request.form["login"]
+           password = request.form["password"]
+           response = data.confirmUserLogin(login, password)
+           if response["status"] == True:
+               login_user(data.USERS[login])
+               flash(response["message"])
+               return redirect(url_for('index'))
+           else:
+               flash(response["message"])
+               return redirect(url_for('login'))
+    
+    elif request.method == "GET":
+        return render_template("login.html")
+
+@app.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out.")
+    return redirect(url_for('login'))
+
 @app.route('/', methods=['POST', 'GET'])
+@login_required
 def index():
     if request.method == "POST" and 'validate' not in request.form:
         time0 = do_none(request.form['time0'])
@@ -128,4 +174,4 @@ def upload():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(ssl_context=('./cert/' + read_cert(), './cert/device.key'), host="0.0.0.0")

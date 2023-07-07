@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Авторизация
+{% endblock %}
+
+{% block body %}
+<form action="/login" method="post" id="loginForm">
+  <label for="inputLogin" class="form-label">Имя пользователя</label>
+  <input type="text" id="inputLogin" class="form-control" name='login'>
+  <label for="inputPassword" class="form-label">Пароль</label>
+  <input name='password' id="inputPassword" class="form-control"><br>
+  <input type="submit" class="btn btn-primary" value="Войти">
+</form>
+
+<style>
+  form#loginForm {
+    width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
+  }
+</style>
+{% endblock %}
