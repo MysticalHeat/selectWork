@@ -5,14 +5,20 @@
 {% endblock %}
 
 {% block body %}
+{% with errors = get_flashed_messages() %}
+
+
+
+
 <form action="/login" method="post" id="loginForm">
+
   <label for="inputLogin" class="form-label">Имя пользователя</label>
-  <input type="text" id="inputLogin" class="form-control" name='login'>
+  <input type="text" id="inputLogin" class="form-control {{ errors[0][0] }}" name='login'>
   <label for="inputPassword" class="form-label">Пароль</label>
-  <input name='password' id="inputPassword" class="form-control"><br>
+  <input type="password" name='password' id="inputPassword" class="form-control {{ errors[0][1] }}"><br>
   <input type="submit" class="btn btn-primary" value="Войти">
 </form>
-
+{% endwith %}
 <style>
   form#loginForm {
     width: 400px;

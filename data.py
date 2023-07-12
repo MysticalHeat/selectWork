@@ -1,3 +1,6 @@
+from config import ADMIN_LOGIN as login
+from config import ADMIN_PASS as password
+
 class User():
     def __init__(self, username, password, active=True):
         self.id = id
@@ -15,7 +18,7 @@ class User():
         return self.username
 
 USERS = {
-    "admin": User("admin", "12345678")
+    login: User(login, password)
 }
 
 def confirmUserLogin(login, password):
@@ -25,8 +28,8 @@ def confirmUserLogin(login, password):
             response = {"status":True, "message":"Login Successfull!"}
             return response
         else:
-            response = {"status":False, "message":"Wrong password, please try again."}
+            response = {"status":False, "message":"Wrong password, please try again.", "error": ['', 'is-invalid']}
             return response
     else:
-        response = {"status":False, "message":"User does not exist, please try again."}
+        response = {"status":False, "message":"User does not exist, please try again.", "error": ['is-invalid', '']}
         return response

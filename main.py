@@ -78,7 +78,7 @@ def login():
                flash(response["message"])
                return redirect(url_for('index'))
            else:
-               flash(response["message"])
+               flash(response["error"])
                return redirect(url_for('login'))
     
     elif request.method == "GET":
